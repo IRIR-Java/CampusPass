@@ -44,6 +44,7 @@
                 </tbody>
             </table></div>
         </section>
+        <div>
         <form class="card" method="post" asp-action="CreateStaff">
             <div class="card-title">Add a staff member</div>
             <div class="field"><label for="displayName">Full name</label><input class="input" id="displayName" name="displayName" required maxlength="120" placeholder="e.g. Ann Wanjiku" /></div>
@@ -55,6 +56,8 @@
             <div class="field"><label for="departmentId">Department (staff)</label><select class="select" id="departmentId" name="departmentId"><option value="">–</option>@foreach (var d in Model.Departments) { <option value="@d.Id">@d.Name</option> }</select></div>
             <button class="btn btn-primary btn-block"><partial name="_Icon" model="@("plus")" />Create account</button>
         </form>
+        <partial name="_SetPassword" model="@("staff")" />
+        </div>
     </div>
 }
 else
@@ -68,7 +71,7 @@ else
             <form method="post" action="/Admin/IssueAll" asp-antiforgery="true" data-confirm="Create one-time passwords for @Model.WithoutLogin students? You'll download them as a CSV to send by SMS or email."><button class="btn btn-outline"><partial name="_Icon" model="@("download")" />Issue all logins (CSV)</button></form>
         }
     </div>
-    <section class="card">
+    <div class="split"><section class="card">
         @if (!Model.Students.Any())
         {
             <div class="empty"><partial name="_Icon" model="@("users")" />@(Model.StudentTotal == 0 ? "No fee records yet. Upload Finance's file under Fee records." : "No student matches.")</div>
@@ -98,4 +101,5 @@ else
             </table></div>
         }
     </section>
+    <partial name="_SetPassword" model="@("students")" /></div>
 }

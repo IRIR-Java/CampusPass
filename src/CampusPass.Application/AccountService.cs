@@ -19,7 +19,9 @@ public partial class AccountService(IAppDb db, IClock clock)
     public const int MinPasswordLength = 8;
     private static readonly (string Hash, string Salt) Dummy = PasswordHasher.Hash(Guid.NewGuid().ToString());
 
-    public static string Normalize(string? username) => (username ?? "").Trim().ToUpperInvariant();
+    /// <summary>Case- and space-insensitive: "staff 1", "STAFF1" and " Staff 1 " are the same username.</summary>
+    public static string Normalize(string? username) =>
+        string.Concat((username ?? "").Where(c => !char.IsWhiteSpace(c))).ToUpperInvariant();
 
     public async Task<LoginResult> LoginAsync(string username, string password)
     {
@@ -114,6 +116,18 @@ public partial class AccountService(IAppDb db, IClock clock)
         user.MustChangePassword = true; user.FailedLogins = 0; user.LockedUntil = null; user.Disabled = false;
         await db.SaveChangesAsync();
         return temp;
+    }
+
+    /// <summary>The admin sets a specific password (e.g. a shared one for a training session), optionally without forcing a change.</summary>
+    public async Task SetPasswordAsync(string username, string password, bool mustChange)
+    {
+        var key = Normalize(username);
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Username == key) ?? throw new RuleException($"No account called {key}.");
+        // The admin's deliberate choice: only the length rule applies (people's own choices get the full check).
+        if (string.IsNullOrEmpty(password) || password.Length < MinPasswordLength) throw new RuleException($"Use at least {MinPasswordLength} characters.");
+        (user.PasswordHash, user.PasswordSalt) = PasswordHasher.Hash(password);
+        user.MustChangePassword = mustChange; user.FailedLogins = 0; user.LockedUntil = null;
+        await db.SaveChangesAsync();
     }
 
     public async Task<string> ResetPasswordAsync(int userId)

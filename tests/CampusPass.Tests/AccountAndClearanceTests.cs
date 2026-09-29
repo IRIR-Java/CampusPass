@@ -58,6 +58,27 @@ public class AccountTests : IDisposable
     }
 
     [Fact]
+    public async Task Usernames_IgnoreSpacesAndCase()
+    {
+        await w.Accounts.CreateStaffAsync("STAFF 1", "Peter Mutai", Role.Staff, w.Dept("ICT").Id, null);
+        await w.Accounts.SetPasswordAsync("staff1", "staff123", mustChange: false);
+        var r = await w.Accounts.LoginAsync(" Staff 1 ", "staff123");
+        Assert.Equal(LoginOutcome.Ok, r.Outcome);
+        Assert.Equal("STAFF1", r.User!.Username);
+        Assert.False(r.User.MustChangePassword);
+    }
+
+    [Fact]
+    public async Task AdminSetPassword_StillEnforcesMinimumRules()
+    {
+        await w.StudentAsync("EB1/0001/23");
+        await Assert.ThrowsAsync<RuleException>(() => w.Accounts.SetPasswordAsync("EB1/0001/23", "short", false));
+        await Assert.ThrowsAsync<RuleException>(() => w.Accounts.SetPasswordAsync("NOBODY", "student123", false));
+        await w.Accounts.SetPasswordAsync("eb1/0001/23", "student123", mustChange: true);
+        Assert.True((await w.Accounts.LoginAsync("EB1/0001/23", "student123")).User!.MustChangePassword);
+    }
+
+    [Fact]
     public void TemporaryPasswords_AreRandomAndReadable()
     {
         var a = PasswordHasher.NewTemporaryPassword();

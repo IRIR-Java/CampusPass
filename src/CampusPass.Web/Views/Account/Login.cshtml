@@ -11,7 +11,7 @@
         <form method="post" class="card" asp-action="Login">
             <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
             @if (ViewData["Error"] is string err) { <div class="flash flash-error"><partial name="_Icon" model="@("alert")" /><span>@err</span></div> }
-            <div class="field"><label for="username">Reg number or username</label><input class="input mono" id="username" name="username" value="@ViewData["Username"]" autocomplete="username" autocapitalize="characters" spellcheck="false" required autofocus placeholder="e.g. EB1/12345/23" /></div>
+            <div class="field"><label for="username">Reg number or username</label><input class="input mono" id="username" name="username" value="@ViewData["Username"]" autocomplete="username" autocapitalize="characters" spellcheck="false" required autofocus placeholder="e.g. EB1/0001/23 or STAFF 1" /></div>
             <div class="field"><label for="password">Password</label><input class="input" type="password" id="password" name="password" autocomplete="current-password" required /></div>
             <button class="btn btn-primary btn-lg btn-block">Sign in <partial name="_Icon" model="@("arrow")" /></button>
         </form>

@@ -2,34 +2,41 @@
     ViewData["Title"] = "Welcome";
     var inst = ViewData["Institution"] as string;
 }
-<div class="landing">
-    <section class="features" aria-label="About CampusPass">
-        <div class="brand-row">
+@section Head { <link rel="preload" as="image" href="/img/campus-800.jpg" imagesrcset="/img/campus-800.jpg 800w, /img/campus-1600.jpg 1600w" imagesizes="(min-width: 980px) 58vw, 100vw" /> }
+<div class="welcome">
+    <div class="welcome-photo">
+        <img src="/img/campus-800.jpg" srcset="/img/campus-800.jpg 800w, /img/campus-1600.jpg 1600w" sizes="(min-width: 980px) 58vw, 100vw"
+             alt="Aerial view of the @inst main gate and campus buildings" />
+        <div class="welcome-top">
             <span class="brand-mark"><partial name="_Icon" model="@("ticket")" /></span>
-            <div><div class="brand-inst">@inst</div><div class="brand-name">Campus<em>Pass</em></div></div>
+            <b>@inst</b>
         </div>
-        <p class="mt-2" style="font-size:1.15rem;color:var(--g800);font-weight:600">Join the queue remotely, wait less, get things done.</p>
-        <div class="feat-list">
-            <div class="feat"><span class="tile-ic t-green"><partial name="_Icon" model="@("digital")" /></span><div><b>Digital Queue</b><span>No more long physical lines.</span></div></div>
-            <div class="feat"><span class="tile-ic t-green"><partial name="_Icon" model="@("calendar")" /></span><div><b>Smart Batching</b><span>Get a time window, not just a number.</span></div></div>
-            <div class="feat"><span class="tile-ic t-green"><partial name="_Icon" model="@("shield")" /></span><div><b>Organized Services</b><span>Right service. Right department.</span></div></div>
-            <div class="feat"><span class="tile-ic t-green"><partial name="_Icon" model="@("users")" /></span><div><b>Better Experience</b><span>For students, staff and the university.</span></div></div>
+        <div class="welcome-headline">
+            <h1>No more long lines at the gate, Finance or the Registrar.</h1>
+            <p>Check your fees, get your gatepass and join any office's queue from your phone.</p>
+            <div class="feat-glass">
+                <div><partial name="_Icon" model="@("digital")" /><b>Digital Queue</b><span>No more long physical lines.</span></div>
+                <div><partial name="_Icon" model="@("calendar")" /><b>Smart Batching</b><span>A time window, not just a number.</span></div>
+                <div><partial name="_Icon" model="@("shield")" /><b>Organized Services</b><span>Right service. Right office.</span></div>
+                <div><partial name="_Icon" model="@("qr")" /><b>QR Gatepass</b><span>Checked live at the gate.</span></div>
+            </div>
         </div>
-        <div class="note note-green mt-3"><partial name="_Icon" model="@("bulb")" /><div><b>Cleared students skip the line entirely.</b> Your QR gatepass is waiting in the app, and Security checks it with any phone.</div></div>
-    </section>
+    </div>
 
-    <section class="phone-hero">
-        <div class="top">
-            <span class="brand-mark" style="margin:0 auto;width:64px;height:64px;border-radius:18px"><partial name="_Icon" model="@("ticket")" /></span>
-            <div class="inst">@inst</div>
-            <h1>Campus<em>Pass</em></h1>
-            <p class="tag">Join the queue remotely, wait less, get things done.</p>
+    <section class="welcome-sheet">
+        <div class="brand-name">Campus<em>Pass</em></div>
+        <p class="tag">Join the queue remotely, wait less, get things done.</p>
+
+        <ul class="points">
+            <li><span class="tile-ic t-green"><partial name="_Icon" model="@("qr")" /></span><div><b>Fees cleared? Your gatepass is ready</b><span>No stamping, no queue. Show the QR at the gate.</span></div></li>
+            <li><span class="tile-ic t-blue"><partial name="_Icon" model="@("calendar")" /></span><div><b>Get a time window, not a line</b><span>Come when your batch is called.</span></div></li>
+            <li><span class="tile-ic t-amber"><partial name="_Icon" model="@("bell")" /></span><div><b>We tell you when it's your turn</b><span>Wait anywhere on campus.</span></div></li>
+        </ul>
+
+        <div class="welcome-cta">
+            <a class="btn btn-primary btn-lg btn-block" href="/Account/Login?first=true">Get Started <partial name="_Icon" model="@("arrow")" /></a>
+            <a class="btn btn-outline btn-lg btn-block" href="/Account/Login">I already have an account</a>
         </div>
-        <div class="illus"><partial name="_Campus" /></div>
-        <div class="cta">
-            <a class="btn btn-white btn-lg btn-block" href="/Account/Login?first=true">Get Started <partial name="_Icon" model="@("arrow")" /></a>
-            <a class="btn btn-ghost-white btn-lg btn-block" href="/Account/Login">I already have an account</a>
-            <div class="foot">@inst</div>
-        </div>
+        <div class="welcome-foot">Staff and administrators sign in with the same button.</div>
     </section>
 </div>

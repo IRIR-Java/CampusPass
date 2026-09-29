@@ -126,6 +126,14 @@ public class AdminController(IAppDb db, AccountService accounts, FeeImportServic
     }
 
     [HttpPost]
+    public async Task<IActionResult> SetPassword(string username, string password, bool mustChange, string tab = "staff")
+    {
+        await accounts.SetPasswordAsync(username, password, mustChange);
+        TempData["Success"] = $"Password set for {AccountService.Normalize(username)}{(mustChange ? ". They must change it at next sign-in." : ".")}";
+        return RedirectToAction(nameof(Users), new { tab });
+    }
+
+    [HttpPost]
     public async Task<IActionResult> ToggleDisabled(int id)
     {
         var u = await db.Users.FindAsync(id) ?? throw new RuleException("Account not found.");
