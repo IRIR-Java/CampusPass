@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CampusPass</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark cp-nav mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">🎫 CampusPass</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" asp-controller="Student" asp-action="Submit">Get a ticket</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Student" asp-action="Track">Track ticket</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Officer" asp-action="Index">Officer desk</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Index">Admin</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container pb-5">
+        @foreach (var (key, css) in new[] { ("Success", "success"), ("Error", "danger"), ("Info", "info") })
+        {
+            if (TempData[key] is string msg)
+            {
+                <div class="alert alert-@css alert-dismissible fade show" role="alert">
+                    @msg
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+        }
+        @RenderBody()
+    </main>
+
+    <footer class="text-center text-muted small pb-4">COSC 434 · Group .NET · CampusPass prototype</footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

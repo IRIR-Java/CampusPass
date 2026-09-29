@@ -1,0 +1,22 @@
+@model OfficerPickerModel
+@{ ViewData["Title"] = "Officer desk"; }
+
+<h2>Who is at the desk?</h2>
+<p class="text-muted">Prototype shortcut: pick an officer. The real system will use a login.</p>
+
+<div class="row g-4">
+@foreach (var group in Model.Officers.GroupBy(o => o.SectorId))
+{
+    <div class="col-md-6 col-lg-4">
+        <div class="card cp-card p-3 h-100">
+            <h5>@Model.Sectors[group.Key].Name</h5>
+            @foreach (var o in group)
+            {
+                <a class="btn btn-outline-secondary text-start mb-2 @(o.OnDuty ? "" : "disabled")" asp-action="Desk" asp-route-id="@o.Id">
+                    @o.Name @(o.OnDuty ? "" : "(off duty)")
+                </a>
+            }
+        </div>
+    </div>
+}
+</div>

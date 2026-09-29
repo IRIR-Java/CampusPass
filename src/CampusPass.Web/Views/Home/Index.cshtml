@@ -1,0 +1,33 @@
+@{ ViewData["Title"] = "Home"; }
+
+<div class="text-center py-4">
+    <h1 class="fw-bold">Skip the line. Get the right desk.</h1>
+    <p class="lead text-muted">Submit your issue from anywhere. We route it to the correct department, book a service day, and call you when it is your turn.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card cp-card h-100 p-3">
+            <h4>🎓 Student</h4>
+            <p class="text-muted">Describe your problem, get a ticket, and watch your place in the queue.</p>
+            <div class="mt-auto d-grid gap-2">
+                <a class="btn btn-cp" asp-controller="Student" asp-action="Submit">Get a ticket</a>
+                <a class="btn btn-outline-secondary" asp-controller="Student" asp-action="Track">Track my ticket</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card cp-card h-100 p-3">
+            <h4>🧑‍💼 Service officer</h4>
+            <p class="text-muted">Press <strong>Call Next</strong>. The student's problem opens ready to handle.</p>
+            <div class="mt-auto d-grid"><a class="btn btn-cp" asp-controller="Officer" asp-action="Index">Open my desk</a></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card cp-card h-100 p-3">
+            <h4>📊 Queue manager</h4>
+            <p class="text-muted">Staffing, daily capacity, batch load and turnaround times at a glance.</p>
+            <div class="mt-auto d-grid"><a class="btn btn-cp" asp-controller="Admin" asp-action="Index">Open dashboard</a></div>
+        </div>
+    </div>
+</div>

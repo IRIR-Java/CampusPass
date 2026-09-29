@@ -1,0 +1,78 @@
+@model DeskPageModel
+@{ ViewData["Title"] = "Desk"; }
+@section Head { <meta http-equiv="refresh" content="30" /> }
+
+@{ var q = Model.Queue; }
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0">@q.Sector.Name</h2>
+        <div class="text-muted">@Model.Officer.Name · <a asp-action="Index">switch officer</a></div>
+    </div>
+    <div class="text-end">
+        <span class="badge bg-secondary fs-6">@q.Ready.Count ready today</span>
+        <span class="badge bg-light text-dark fs-6">@q.Scheduled.Count scheduled</span>
+    </div>
+</div>
+
+@if (Model.Current is not null)
+{
+    <div class="card cp-card p-4 mb-4 border-start border-warning border-5">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <div class="text-muted small">You are serving</div>
+                <span class="ticket-number ticket-big">@Model.Current.Number</span>
+                <partial name="_StatusBadge" model="Model.Current.Status" />
+                <div>@Model.Current.Title</div>
+            </div>
+            <a class="btn btn-cp btn-lg" asp-action="Ticket" asp-route-id="@Model.Current.Id" asp-route-officerId="@Model.Officer.Id">Open ticket →</a>
+        </div>
+    </div>
+}
+else
+{
+    <form asp-action="CallNext" asp-route-id="@Model.Officer.Id" method="post" class="mb-4">
+        <button class="btn btn-cp call-next" type="submit" @(q.Ready.Any() ? "" : "disabled")>📣 Call Next</button>
+        @if (!q.Ready.Any()) { <span class="text-muted ms-3">Nobody waiting for today's batch.</span> }
+    </form>
+}
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card cp-card p-3">
+            <h5>Waiting today</h5>
+            @if (!q.Ready.Any()) { <p class="text-muted mb-0">Queue is empty 🎉</p> }
+            else
+            {
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>#</th><th>Problem</th><th>Waiting since</th></tr></thead>
+                    <tbody>
+                    @foreach (var t in q.Ready)
+                    {
+                        <tr>
+                            <td class="ticket-number">@t.Number @if (t.Urgency == Urgency.Urgent) { <span class="badge bg-danger">URGENT</span> }</td>
+                            <td>@t.Title</td>
+                            <td class="text-muted small">@t.CreatedAt.ToString("dd MMM HH:mm")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card cp-card p-3">
+            <h5>Booked for later</h5>
+            @if (!q.Scheduled.Any()) { <p class="text-muted mb-0">Nothing scheduled.</p> }
+            else
+            {
+                <ul class="list-unstyled mb-0">
+                @foreach (var g in q.Scheduled.GroupBy(t => t.BatchId))
+                {
+                    <li class="mb-1"><strong>@g.Count()</strong> ticket(s): <span class="ticket-number small">@string.Join(", ", g.Take(4).Select(t => t.Number))@(g.Count() > 4 ? " …" : "")</span></li>
+                }
+                </ul>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,74 @@
+@model TrackPageModel
+@{
+    ViewData["Title"] = "Track ticket";
+    var r = Model.Result;
+    var live = r is not null && r.Ticket.Status is TicketStatus.Waiting or TicketStatus.Called or TicketStatus.InProgress;
+}
+@section Head { @if (live) { <meta http-equiv="refresh" content="20" /> } }
+
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+
+    @if (Model.JustCreated && r is not null)
+    {
+        <div class="alert alert-success">
+            <strong>Ticket created!</strong> Keep your ticket number safe. You can come back to this page any time.
+        </div>
+    }
+
+    <form method="get" asp-action="Track" class="input-group mb-4">
+      <input name="number" value="@Model.Number" class="form-control form-control-lg" placeholder="Ticket number e.g. ICT-001" />
+      <button class="btn btn-cp" type="submit">Track</button>
+    </form>
+
+    @if (Model.NotFound)
+    {
+        <div class="alert alert-warning">No ticket found with that number. Check the spelling (e.g. <span class="ticket-number">ICT-001</span>).</div>
+    }
+
+    @if (r is not null)
+    {
+        <div class="card cp-card p-4">
+            <div class="text-center">
+                <div class="ticket-number ticket-big">@r.Ticket.Number</div>
+                <partial name="_StatusBadge" model="r.Ticket.Status" />
+            </div>
+            <hr />
+            <dl class="row mb-0">
+                <dt class="col-sm-4">Problem</dt><dd class="col-sm-8">@r.Ticket.Title</dd>
+                <dt class="col-sm-4">Department</dt><dd class="col-sm-8">@r.Sector.Name</dd>
+                @if (r.Batch is not null)
+                {
+                    <dt class="col-sm-4">Service day</dt><dd class="col-sm-8">@r.Batch.Date.ToString("dddd, dd MMM yyyy")</dd>
+                }
+                @if (r.Ticket.Status == TicketStatus.Waiting)
+                {
+                    <dt class="col-sm-4">Ahead of you</dt><dd class="col-sm-8">@r.TicketsAhead ticket(s)</dd>
+                }
+                @if (r.Ticket.Urgency == Urgency.Urgent)
+                {
+                    <dt class="col-sm-4">Priority</dt><dd class="col-sm-8">Urgent</dd>
+                }
+            </dl>
+
+            @if (r.Ticket.Status == TicketStatus.Called)
+            {
+                <div class="alert alert-warning mt-3 mb-0"><strong>It is your turn!</strong> Please go to the @r.Sector.Name desk now.</div>
+            }
+            @if (r.Ticket.Status == TicketStatus.Resolved)
+            {
+                <div class="alert alert-success mt-3 mb-0"><strong>Resolved:</strong> @r.Ticket.ResolutionNotes</div>
+            }
+
+            <h6 class="mt-4">History</h6>
+            <ul class="timeline small mb-0">
+                @foreach (var e in r.Ticket.History)
+                {
+                    <li><span class="text-muted">@e.At.ToString("dd MMM HH:mm")</span> · @e.Message</li>
+                }
+            </ul>
+        </div>
+        @if (live) { <p class="text-center text-muted small mt-2">This page refreshes automatically.</p> }
+    }
+  </div>
+</div>

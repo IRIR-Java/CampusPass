@@ -1,0 +1,72 @@
+@model AdminPageModel
+@{ ViewData["Title"] = "Admin"; }
+@section Head { <meta http-equiv="refresh" content="30" /> }
+
+<h2>Queue manager dashboard</h2>
+<p class="text-muted">Live view of every sector. Toggle an officer off duty and watch capacity and future batches adjust.</p>
+
+<div class="row g-4">
+@foreach (var s in Model.Stats)
+{
+    <div class="col-lg-6">
+        <div class="card cp-card p-3 h-100">
+            <div class="d-flex justify-content-between">
+                <h5 class="mb-0">@s.Sector.Name</h5>
+                <span class="text-muted small">@s.OnDutyOfficers officer(s) · @s.DailyCapacity/day</span>
+            </div>
+            <div class="row text-center my-3">
+                <div class="col"><div class="fs-3 fw-bold">@s.Waiting</div><div class="small text-muted">Waiting</div></div>
+                <div class="col"><div class="fs-3 fw-bold">@s.Active</div><div class="small text-muted">Being served</div></div>
+                <div class="col"><div class="fs-3 fw-bold">@s.ResolvedTotal</div><div class="small text-muted">Resolved</div></div>
+                <div class="col"><div class="fs-3 fw-bold">@(s.AvgWaitMinutes?.ToString("0.#") ?? "-")</div><div class="small text-muted">Avg wait (min)</div></div>
+                <div class="col"><div class="fs-3 fw-bold">@(s.AvgHandleMinutes?.ToString("0.#") ?? "-")</div><div class="small text-muted">Avg handle (min)</div></div>
+            </div>
+            <div class="small text-muted mb-1">Upcoming batches</div>
+            @if (!s.UpcomingBatches.Any()) { <div class="text-muted small">No batches yet.</div> }
+            @foreach (var b in s.UpcomingBatches)
+            {
+                var pct = b.Capacity == 0 ? 0 : Math.Min(100, b.Booked * 100 / b.Capacity);
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <div style="width:90px" class="small">@b.Date.ToString("ddd dd MMM")</div>
+                    <div class="load-bar flex-grow-1 @(pct >= 100 ? "full" : "")"><span style="width:@pct%"></span></div>
+                    <div style="width:60px" class="small text-end">@b.Booked/@b.Capacity</div>
+                </div>
+            }
+        </div>
+    </div>
+}
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-lg-4">
+        <div class="card cp-card p-3">
+            <h5>Staff</h5>
+            @foreach (var o in Model.Officers)
+            {
+                <form asp-action="ToggleDuty" asp-route-id="@o.Id" method="post" class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small">@o.Name<br /><span class="text-muted">@Model.SectorsById[o.SectorId].Name</span></span>
+                    <button class="btn btn-sm @(o.OnDuty ? "btn-success" : "btn-outline-secondary")">@(o.OnDuty ? "On duty" : "Off duty")</button>
+                </form>
+            }
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card cp-card p-3">
+            <h5>Recent tickets</h5>
+            <table class="table table-sm align-middle mb-0">
+                <thead><tr><th>#</th><th>Problem</th><th>Sector</th><th>Status</th></tr></thead>
+                <tbody>
+                @foreach (var t in Model.Recent)
+                {
+                    <tr>
+                        <td class="ticket-number">@t.Number</td>
+                        <td>@t.Title</td>
+                        <td class="small">@Model.SectorsById[t.SectorId].Name</td>
+                        <td><partial name="_StatusBadge" model="t.Status" /></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

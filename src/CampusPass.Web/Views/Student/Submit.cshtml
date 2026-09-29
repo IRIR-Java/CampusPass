@@ -1,0 +1,59 @@
+@model SubmitPageModel
+@{ ViewData["Title"] = "Get a ticket"; }
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card cp-card p-4">
+      <h2>Get a ticket</h2>
+      <p class="text-muted">Takes about a minute. No need to queue physically.</p>
+
+      <form asp-action="Submit" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label asp-for="Form.StudentName" class="form-label"></label>
+            <input asp-for="Form.StudentName" class="form-control" autocomplete="name" />
+            <span asp-validation-for="Form.StudentName" class="text-danger small"></span>
+          </div>
+          <div class="col-md-6">
+            <label asp-for="Form.RegNo" class="form-label"></label>
+            <input asp-for="Form.RegNo" class="form-control" placeholder="e.g. CS/2021/101" />
+            <span asp-validation-for="Form.RegNo" class="text-danger small"></span>
+          </div>
+          <div class="col-md-6">
+            <label asp-for="Form.Phone" class="form-label"></label>
+            <input asp-for="Form.Phone" class="form-control" type="tel" autocomplete="tel" />
+            <span asp-validation-for="Form.Phone" class="text-danger small"></span>
+          </div>
+          <div class="col-md-6">
+            <label asp-for="Form.SectorId" class="form-label"></label>
+            <select asp-for="Form.SectorId" class="form-select">
+              <option value="">Not sure, route it for me</option>
+              @foreach (var s in Model.Sectors)
+              {
+                  <option value="@s.Id">@s.Name</option>
+              }
+            </select>
+          </div>
+          <div class="col-12">
+            <label asp-for="Form.Title" class="form-label"></label>
+            <input asp-for="Form.Title" class="form-control" placeholder="e.g. Gate pass cannot be downloaded" />
+            <span asp-validation-for="Form.Title" class="text-danger small"></span>
+          </div>
+          <div class="col-12">
+            <label asp-for="Form.Description" class="form-label"></label>
+            <textarea asp-for="Form.Description" class="form-control" rows="4" placeholder="What happened? What did you try? Any error message?"></textarea>
+            <span asp-validation-for="Form.Description" class="text-danger small"></span>
+          </div>
+          <div class="col-12 form-check ms-2">
+            <input asp-for="Form.Urgent" class="form-check-input" />
+            <label asp-for="Form.Urgent" class="form-check-label"></label>
+          </div>
+        </div>
+        <button class="btn btn-cp btn-lg mt-4" type="submit">Submit and get my ticket</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

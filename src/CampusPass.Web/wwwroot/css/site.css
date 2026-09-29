@@ -1,0 +1,15 @@
+:root { --cp-primary: #512bd4; /* .NET purple */ }
+body { background: #f6f7fb; }
+.cp-nav { background: var(--cp-primary); }
+.cp-card { border: 0; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.ticket-number { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; letter-spacing: .5px; }
+.ticket-big { font-size: 2.6rem; }
+.btn-cp { background: var(--cp-primary); color: #fff; }
+.btn-cp:hover { background: #3f20a8; color: #fff; }
+.call-next { font-size: 1.4rem; padding: .9rem 2rem; }
+.timeline { list-style: none; padding-left: 0; border-left: 3px solid #e3e0f7; margin-left: .5rem; }
+.timeline li { padding: 0 0 .8rem 1rem; position: relative; }
+.timeline li::before { content: ""; position: absolute; left: -8px; top: 6px; width: 13px; height: 13px; border-radius: 50%; background: var(--cp-primary); }
+.load-bar { height: 10px; border-radius: 6px; background: #e9e7f7; overflow: hidden; }
+.load-bar > span { display: block; height: 100%; background: var(--cp-primary); }
+.load-bar.full > span { background: #dc3545; }

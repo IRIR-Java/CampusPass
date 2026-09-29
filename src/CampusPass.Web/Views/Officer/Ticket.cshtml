@@ -1,0 +1,88 @@
+@model OfficerTicketPageModel
+@{
+    ViewData["Title"] = Model.Ticket.Number;
+    var t = Model.Ticket;
+    var active = t.Status is TicketStatus.Called or TicketStatus.InProgress;
+}
+
+<a asp-action="Desk" asp-route-id="@Model.Officer.Id" class="text-decoration-none">← Back to desk</a>
+
+<div class="row g-4 mt-1">
+  <div class="col-lg-7">
+    <div class="card cp-card p-4">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <span class="ticket-number ticket-big">@t.Number</span>
+                <div class="mt-1"><partial name="_StatusBadge" model="t.Status" />
+                @if (t.Urgency == Urgency.Urgent) { <span class="badge bg-danger">URGENT</span> }</div>
+            </div>
+            <div class="text-muted small text-end">@Model.Sector.Name<br />Opened @t.CreatedAt.ToString("dd MMM HH:mm")</div>
+        </div>
+        <hr />
+        <h5>@t.Title</h5>
+        <p style="white-space: pre-wrap">@t.Description</p>
+        <dl class="row mb-0 small">
+            <dt class="col-sm-3">Student</dt><dd class="col-sm-9">@t.StudentName</dd>
+            <dt class="col-sm-3">Reg no.</dt><dd class="col-sm-9">@t.RegNo</dd>
+            <dt class="col-sm-3">Phone</dt><dd class="col-sm-9">@t.Phone</dd>
+        </dl>
+        @if (t.Status == TicketStatus.Resolved)
+        {
+            <div class="alert alert-success mt-3 mb-0"><strong>Resolution:</strong> @t.ResolutionNotes</div>
+        }
+    </div>
+
+    <div class="card cp-card p-4 mt-4">
+        <h6>History</h6>
+        <ul class="timeline small mb-0">
+            @foreach (var e in t.History)
+            {
+                <li><span class="text-muted">@e.At.ToString("dd MMM HH:mm")</span> · @e.Message</li>
+            }
+        </ul>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    @if (active)
+    {
+        <div class="card cp-card p-4">
+            <h5>Handle ticket</h5>
+
+            @if (t.Status == TicketStatus.Called)
+            {
+                <form asp-action="Start" method="post" class="mb-3">
+                    <input type="hidden" name="id" value="@t.Id" /><input type="hidden" name="officerId" value="@Model.Officer.Id" />
+                    <button class="btn btn-primary w-100">▶ Start working</button>
+                </form>
+            }
+
+            <form asp-action="Resolve" method="post" class="mb-3">
+                <input type="hidden" name="id" value="@t.Id" /><input type="hidden" name="officerId" value="@Model.Officer.Id" />
+                <label class="form-label">Resolution note (the student will see this)</label>
+                <textarea name="notes" class="form-control mb-2" rows="3" required></textarea>
+                <button class="btn btn-success w-100">✅ Mark resolved</button>
+            </form>
+
+            <hr />
+            <form asp-action="Reroute" method="post" class="mb-3">
+                <input type="hidden" name="id" value="@t.Id" /><input type="hidden" name="officerId" value="@Model.Officer.Id" />
+                <label class="form-label">Wrong department? Re-route</label>
+                <select name="newSectorId" class="form-select mb-2">
+                    @foreach (var s in Model.OtherSectors) { <option value="@s.Id">@s.Name</option> }
+                </select>
+                <input name="reason" class="form-control mb-2" placeholder="Reason (required)" required />
+                <button class="btn btn-outline-warning w-100">↪ Re-route</button>
+            </form>
+
+            @if (t.Status == TicketStatus.Called)
+            {
+                <form asp-action="NoShow" method="post">
+                    <input type="hidden" name="id" value="@t.Id" /><input type="hidden" name="officerId" value="@Model.Officer.Id" />
+                    <button class="btn btn-outline-secondary w-100">🚫 Student did not respond (no-show)</button>
+                </form>
+            }
+        </div>
+    }
+  </div>
+</div>

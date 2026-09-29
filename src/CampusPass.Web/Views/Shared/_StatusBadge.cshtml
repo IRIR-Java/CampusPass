@@ -1,0 +1,13 @@
+@model TicketStatus
+@{
+    var (css, label) = Model switch
+    {
+        TicketStatus.Waiting => ("secondary", "Waiting"),
+        TicketStatus.Called => ("warning text-dark", "Called - come to the desk"),
+        TicketStatus.InProgress => ("primary", "In progress"),
+        TicketStatus.Resolved => ("success", "Resolved"),
+        TicketStatus.NoShow => ("dark", "No-show"),
+        _ => ("light text-dark", Model.ToString())
+    };
+}
+<span class="badge bg-@css">@label</span>

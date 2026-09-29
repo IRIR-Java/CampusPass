@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4E9DA0F8-90E5-46A6-BD87-46EF84057FCC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CampusPass.Application", "src\CampusPass.Application\CampusPass.Application.csproj", "{108F5012-62BB-4663-9D95-EC47EC0D9060}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CampusPass.Domain", "src\CampusPass.Domain\CampusPass.Domain.csproj", "{1D3EEDB1-E4AC-4E0B-BF08-33C061B1F137}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CampusPass.Infrastructure", "src\CampusPass.Infrastructure\CampusPass.Infrastructure.csproj", "{3F485807-D6F4-43F1-892F-0180B8FB1040}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CampusPass.Web", "src\CampusPass.Web\CampusPass.Web.csproj", "{66CCA539-DF56-4D00-86ED-863CAC3FC9BC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{563CA486-53A9-4AE6-9DAC-F89F2B78ED05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CampusPass.Tests", "tests\CampusPass.Tests\CampusPass.Tests.csproj", "{33041EA2-99D0-494E-B06A-86D35367C4AC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{108F5012-62BB-4663-9D95-EC47EC0D9060}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{108F5012-62BB-4663-9D95-EC47EC0D9060}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{108F5012-62BB-4663-9D95-EC47EC0D9060}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{108F5012-62BB-4663-9D95-EC47EC0D9060}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D3EEDB1-E4AC-4E0B-BF08-33C061B1F137}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D3EEDB1-E4AC-4E0B-BF08-33C061B1F137}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D3EEDB1-E4AC-4E0B-BF08-33C061B1F137}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D3EEDB1-E4AC-4E0B-BF08-33C061B1F137}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F485807-D6F4-43F1-892F-0180B8FB1040}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F485807-D6F4-43F1-892F-0180B8FB1040}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F485807-D6F4-43F1-892F-0180B8FB1040}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F485807-D6F4-43F1-892F-0180B8FB1040}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66CCA539-DF56-4D00-86ED-863CAC3FC9BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66CCA539-DF56-4D00-86ED-863CAC3FC9BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66CCA539-DF56-4D00-86ED-863CAC3FC9BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66CCA539-DF56-4D00-86ED-863CAC3FC9BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33041EA2-99D0-494E-B06A-86D35367C4AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33041EA2-99D0-494E-B06A-86D35367C4AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33041EA2-99D0-494E-B06A-86D35367C4AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33041EA2-99D0-494E-B06A-86D35367C4AC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{108F5012-62BB-4663-9D95-EC47EC0D9060} = {4E9DA0F8-90E5-46A6-BD87-46EF84057FCC}
+		{1D3EEDB1-E4AC-4E0B-BF08-33C061B1F137} = {4E9DA0F8-90E5-46A6-BD87-46EF84057FCC}
+		{3F485807-D6F4-43F1-892F-0180B8FB1040} = {4E9DA0F8-90E5-46A6-BD87-46EF84057FCC}
+		{66CCA539-DF56-4D00-86ED-863CAC3FC9BC} = {4E9DA0F8-90E5-46A6-BD87-46EF84057FCC}
+		{33041EA2-99D0-494E-B06A-86D35367C4AC} = {563CA486-53A9-4AE6-9DAC-F89F2B78ED05}
+	EndGlobalSection
+EndGlobal
