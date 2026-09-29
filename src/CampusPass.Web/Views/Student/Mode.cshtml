@@ -1,0 +1,81 @@
+@model ModePage
+@inject IClock Clock
+@{
+    Layout = "_Student";
+    ViewData["Title"] = "Request Service";
+    ViewData["Tab"] = "home";
+    var d = Model.Department;
+    var now = Clock.Now;
+    var today = DateOnly.FromDateTime(now);
+}
+<partial name="_Bar" model="@(("Request Service", (string?)"/Student/Request"))" />
+<div class="screen" style="padding-top:.2rem">
+    <partial name="_Steps" model="2" />
+    <partial name="_Flash" />
+
+    <div class="list-item" style="border-color:var(--g200)">
+        <span class="tile-ic t-@d.Color"><partial name="_Icon" model="@d.Icon" /></span>
+        <div class="grow"><b>@d.Name</b><span>@d.Description</span></div>
+        <a class="small" href="/Student/Request">Change</a>
+    </div>
+
+    <form method="post" action="/Student/Mode/@d.Id" asp-antiforgery="true">
+        <div class="section">How would you like to be served?</div>
+
+        <label class="mode">
+            <input type="radio" name="mode" value="Queue" checked data-mode />
+            <span class="tile-ic"><partial name="_Icon" model="@("clock")" /></span>
+            <div class="grow"><b>Join Queue</b><span>@(Model.NextSlot is Slot n ? $"Next batch: Batch {n.Batch} · {QueueService.Describe(n.Start, n.End, now)}" : "Get a ticket and wait for your turn.")</span></div>
+            <partial name="_Icon" model="@("chev")" />
+        </label>
+        <label class="mode">
+            <input type="radio" name="mode" value="Appointment" data-mode />
+            <span class="tile-ic"><partial name="_Icon" model="@("calendar")" /></span>
+            <div class="grow"><b>Book Appointment</b><span>Choose a specific time slot.</span></div>
+            <partial name="_Icon" model="@("chev")" />
+        </label>
+
+        <div class="mt-2 hide" data-when="Appointment">
+            @if (!Model.Days.Any())
+            {
+                <div class="note note-amber"><partial name="_Icon" model="@("alert")" /><div>No times are open in the coming days. Join the queue instead.</div></div>
+            }
+            else
+            {
+                <div class="label">Pick a day</div>
+                <div class="days" role="tablist">
+                    @for (var i = 0; i < Model.Days.Count; i++)
+                    {
+                        var day = Model.Days[i].Day;
+                        <button type="button" class="day @(i == 0 ? "on" : "")" data-day="@day.ToString("yyyy-MM-dd")">@(day == today ? "Today" : day.ToString("ddd"))<b>@day.Day</b>@day.ToString("MMM")</button>
+                    }
+                </div>
+                @for (var i = 0; i < Model.Days.Count; i++)
+                {
+                    var (day, slots) = Model.Days[i];
+                    <div class="slots @(i == 0 ? "" : "hide")" data-day-group="@day.ToString("yyyy-MM-dd")">
+                        @foreach (var s in slots)
+                        {
+                            var id = "s" + s.Start.ToString("yyyyMMddHHmm");
+                            <div class="slot">
+                                <input type="radio" id="@id" name="slot" value="@s.Start.ToString("yyyy-MM-ddTHH:mm")" disabled="@s.Full" />
+                                <label for="@id">@s.Start.ToString("h:mm") – @s.End.ToString("h:mm tt")<span>Batch @s.Batch · @(s.Full ? "Full" : $"{s.Left} left")</span></label>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+
+        @if (Model.FacultyDay is DateOnly fd && fd > today)
+        {
+            <div class="note note-green mt-2"><partial name="_Icon" model="@("calendar")" /><div>Your faculty's registration day is <b>@fd.ToString("dddd d MMM")</b>, so your batch starts from then. This keeps every day's line short.</div></div>
+        }
+
+        <div class="section">Service Description</div>
+        <textarea class="textarea" name="description" maxlength="500" placeholder="Briefly describe your issue (optional)&#10;e.g. Portal login not working"></textarea>
+
+        <button class="btn btn-primary btn-lg btn-block mt-2">Get Ticket <partial name="_Icon" model="@("arrow")" /></button>
+        <p class="hint center">You'll get a ticket number and a time window. No need to stand in line.</p>
+    </form>
+</div>

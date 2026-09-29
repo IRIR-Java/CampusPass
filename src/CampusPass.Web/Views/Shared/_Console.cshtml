@@ -1,0 +1,50 @@
+@inject NotificationService Notify
+@inject IAppDb Db
+@{
+    Layout = "_Layout";
+    var admin = User.IsInRole(nameof(Role.Admin));
+    var nav = ViewData["Nav"] as string ?? "";
+    var unread = await Notify.UnreadAsync(User.UserId());
+    var settings = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(Db.Settings);
+    var me = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(
+        Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.Include(Db.Users, u => u.Department), u => u.Id == User.UserId());
+    var items = admin
+        ? new[] { ("dashboard", "Dashboard", "/Admin", "grid"), ("services", "Services", "/Admin/Services", "layers"), ("users", "Users", "/Admin/Users", "users"), ("fees", "Fee records", "/Admin/Fees", "wallet"), ("batches", "Batches", "/Admin/Batches", "calendar"), ("reports", "Reports", "/Admin/Reports", "chart"), ("settings", "Settings", "/Admin/Settings", "settings") }
+        : new[] { ("dashboard", "Dashboard", "/Staff", "grid"), ("queue", "Queue", "/Staff/Queue", "queue"), ("serve", "Call Next", "/Staff/Serve", "megaphone"), ("tickets", "Tickets", "/Staff/Tickets", "ticket"), ("students", "Students", "/Staff/Students", "users"), ("reports", "Reports", "/Staff/Reports", "chart"), ("settings", "Settings", "/Staff/Settings", "settings") };
+    var searchAction = admin ? "/Admin/Users" : "/Staff/Tickets";
+}
+<div class="console">
+    <aside class="side">
+        <a class="brand" href="@(admin ? "/Admin" : "/Staff")" style="text-decoration:none">
+            <span class="brand-mark"><partial name="_Icon" model="@("ticket")" /></span>
+            <div><b>@(settings?.InstitutionName ?? "CampusPass")</b><span>CampusPass</span></div>
+        </a>
+        <nav>
+            @foreach (var (key, label, href, icon) in items)
+            {
+                <a class="@(nav == key ? "on" : "")" href="@href"><partial name="_Icon" model="@icon" />@label</a>
+            }
+        </nav>
+        <div class="side-foot">@(settings?.Semester)</div>
+    </aside>
+    <div class="main">
+        <header class="topbar">
+            <form class="search" method="get" action="@searchAction" role="search">
+                @if (admin) { <input type="hidden" name="tab" value="students" /> }
+                <partial name="_Icon" model="@("search")" />
+                <input class="input" name="q" placeholder="@(admin ? "Search student by reg no or name..." : "Search ticket, student or reg no...")" aria-label="Search" />
+            </form>
+            <div class="spacer"></div>
+            <a class="icon-btn" href="/Notifications" aria-label="Notifications"><partial name="_Icon" model="@("bell")" />@if (unread > 0) { <span class="badge">@unread</span> }</a>
+            <div class="me">
+                <span class="avatar">@Auth.Initials(me?.DisplayName ?? "?")</span>
+                <div><b>@me?.DisplayName</b><span>@(admin ? "Administrator" : $"Service Officer · {me?.Department?.Name}")</span></div>
+            </div>
+            <form method="post" action="/Account/Logout" asp-antiforgery="true"><button class="icon-btn" title="Log out" aria-label="Log out"><partial name="_Icon" model="@("logout")" /></button></form>
+        </header>
+        <main class="content">
+            <partial name="_Flash" />
+            @RenderBody()
+        </main>
+    </div>
+</div>

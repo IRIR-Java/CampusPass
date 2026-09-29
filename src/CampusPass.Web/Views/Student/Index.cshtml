@@ -1,0 +1,81 @@
+@model StudentHome
+@inject NotificationService Notify
+@{
+    Layout = "_Student";
+    ViewData["Title"] = "Home";
+    ViewData["Tab"] = "home";
+    var first = Model.User.DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
+    var unread = await Notify.UnreadAsync(Model.User.Id);
+    var c = Model.Clearance;
+}
+<div class="screen">
+    <div class="row between row-top">
+        <div>
+            <div class="hello">Hello, @first 👋</div>
+            <div class="muted">What service do you need today?</div>
+        </div>
+        <a class="btn btn-light" style="width:44px;height:44px;padding:0;position:relative" href="/Notifications" aria-label="Notifications (@unread unread)"><partial name="_Icon" model="@("bell")" />@if (unread > 0) { <span class="badge">@unread</span> }</a>
+    </div>
+
+    <partial name="_Flash" />
+
+    <div class="search mt-2">
+        <partial name="_Icon" model="@("search")" />
+        <input class="input" type="search" placeholder="Search for a service..." data-filter=".cat" aria-label="Search for a service" />
+    </div>
+
+    <div class="mt-2">
+        @if (c is null)
+        {
+            <a class="clear-card clear-none" href="/Student/Mode/@(Model.Services.FirstOrDefault(s => s.Code == "FIN")?.Id)">
+                <span class="tile-ic"><partial name="_Icon" model="@("wallet")" /></span>
+                <div><b>No fee record yet</b><span>Finance hasn't uploaded your balance. Tap to ask Finance.</span></div>
+                <span class="chev"><partial name="_Icon" model="@("chev")" /></span>
+            </a>
+        }
+        else if (c.Cleared)
+        {
+            <a class="clear-card clear-ok" href="/Student/Gatepass">
+                <span class="tile-ic"><partial name="_Icon" model="@("qr")" /></span>
+                <div><b>Fees cleared · Gatepass ready</b><span>@(c.Record.Balance < 0 ? $"{Fmt.Money(-c.Record.Balance)} credit" : "Balance KES 0") · tap to show it at the gate</span></div>
+                <span class="chev"><partial name="_Icon" model="@("chev")" /></span>
+            </a>
+        }
+        else
+        {
+            <a class="clear-card clear-owe" href="/Student/Gatepass">
+                <span class="tile-ic"><partial name="_Icon" model="@("wallet")" /></span>
+                <div><b>Balance @Fmt.Money(c.Record.Balance)</b><span>Clear it to get your gatepass · tap for how to pay</span></div>
+                <span class="chev"><partial name="_Icon" model="@("chev")" /></span>
+            </a>
+        }
+
+        @if (Model.Active is Ticket t)
+        {
+            var (label, css) = Fmt.Status(t.Status);
+            <a class="active-banner" href="/Student/Ticket/@t.Id">
+                <span class="tile-ic t-green"><partial name="_Icon" model="@("ticket")" /></span>
+                <div class="grow"><b class="mono">@t.Number</b> <span class="pill @css">@label</span><div class="small muted">@t.Department!.Name · @Fmt.Window(t.WindowStart, t.WindowEnd)</div></div>
+                <span style="color:#a3b0a9"><partial name="_Icon" model="@("chev")" /></span>
+            </a>
+        }
+    </div>
+
+    <div class="section">Service Categories</div>
+    <div class="grid2">
+        @foreach (var s in Model.Services)
+        {
+            <a class="cat" href="/Student/Mode/@s.Id" data-text="@s.Name @s.Description">
+                <span class="tile-ic s-@s.Color"><partial name="_Icon" model="@s.Icon" /></span>
+                <div><b>@s.Name</b><br /><span>@s.Description</span></div>
+                <span class="chev"><partial name="_Icon" model="@("chev")" /></span>
+            </a>
+        }
+    </div>
+    <p class="empty hide" data-empty>No service matches that. Try "fees", "portal" or "exam".</p>
+
+    <div class="note mt-2">
+        <partial name="_Icon" model="@("info")" />
+        <div><b>Need help?</b><br />@(string.IsNullOrWhiteSpace(Model.Settings.SupportContact) ? "Visit the ICT office during working hours." : Model.Settings.SupportContact)</div>
+    </div>
+</div>

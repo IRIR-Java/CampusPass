@@ -1,0 +1,51 @@
+@model GatepassPage
+@{
+    Layout = "_Student";
+    ViewData["Title"] = "My Gatepass";
+    ViewData["Tab"] = "profile";
+    var c = Model.Clearance;
+    var fin = "/Student/Request";
+}
+<partial name="_Bar" model="@(("My Gatepass", (string?)"/Student"))" />
+<div class="screen" style="padding-top:.2rem">
+    @if (c is null)
+    {
+        <div class="empty"><partial name="_Icon" model="@("wallet")" /><b>No fee record yet</b><p class="mt-1">Finance hasn't uploaded your balance. Request the Finance service so they can check.</p><a class="btn btn-primary" href="@fin">Request a service</a></div>
+    }
+    else if (c.Cleared && Model.QrSvg is not null && c.Pass is not null)
+    {
+        <section class="pass">
+            <div class="pass-head"><span>Gatepass · @c.Pass.Semester</span><span class="mono small">@c.Pass.Serial</span></div>
+            <div class="pass-body">
+                <div class="qr" role="img" aria-label="Gatepass QR code">@Html.Raw(Model.QrSvg)</div>
+                <div style="font-weight:800;font-size:1.2rem">@c.Record.Name</div>
+                <div class="mono">@c.Record.RegNo</div>
+                <div class="small muted">@c.Record.Faculty</div>
+                <div class="pill pill-green mt-1"><partial name="_Icon" model="@("check")" /> Fees cleared · valid to @c.Pass.ExpiresAt.ToString("d MMM yyyy")</div>
+            </div>
+        </section>
+        <div class="note note-green mt-2"><partial name="_Icon" model="@("shield")" /><div>Security scans this with any phone and checks it against the university's records. A screenshot works too, and edited copies are rejected.</div></div>
+        <button class="btn btn-light btn-block mt-2 no-print" data-print><partial name="_Icon" model="@("download")" /> Print / save as PDF</button>
+    }
+    else
+    {
+        <section class="card" style="border:1px solid var(--line);box-shadow:none">
+            <span class="pill pill-amber">Not cleared</span>
+            <div style="font-size:2rem;font-weight:800;margin:.4rem 0 .1rem">@Fmt.Money(c.Record.Balance)</div>
+            <div class="muted small">left to pay · updated @c.Record.BalanceAsOf.ToString("d MMM, HH:mm")</div>
+            <div class="divider"></div>
+            <div class="card-title">How to clear it</div>
+            <p class="small">@Model.Settings.PaymentInstructions</p>
+            <dl class="dl" style="grid-template-columns:110px 1fr">
+                <dt>Reference</dt><dd class="mono">@c.Record.RegNo</dd>
+                <dt>Amount</dt><dd>@Fmt.Money(c.Record.Balance)</dd>
+            </dl>
+            <p class="small muted mt-1 mb-0">Once Finance's records show it paid, your gatepass appears here automatically and you'll get a notification.</p>
+        </section>
+        @if (c.Stale)
+        {
+            <div class="note note-amber mt-2"><partial name="_Icon" model="@("alert")" /><div>These figures are more than 2 days old. If you paid recently, it may not show yet.</div></div>
+        }
+        <a class="btn btn-outline btn-block mt-2" href="@fin">Paid but not showing? Ask Finance</a>
+    }
+</div>

@@ -1,0 +1,121 @@
+@model TicketView
+@{
+    Layout = "_Student";
+    ViewData["Tab"] = "tickets";
+    var t = Model.Ticket;
+    var d = Model.Department;
+    var now = (DateTime)ViewData["Now"]!;
+    var created = ViewData["Created"] is true;
+    var existing = ViewData["Existing"] is true;
+    var called = t.Status == TicketStatus.Called;
+    var serving = t.Status == TicketStatus.Serving;
+    var closed = !t.IsOpen;
+    var alert = Model.Almost || called;
+    ViewData["Title"] = alert ? "Almost Your Turn" : "Ticket Details";
+    var (label, css) = Fmt.Status(t.Status);
+    var mapUrl = "https://www.google.com/maps/search/?api=1&query=" + Uri.EscapeDataString(d.Location + " " + d.Name);
+}
+<partial name="_Bar" model="@((called ? "Your Turn" : alert ? "Almost Your Turn" : "Ticket Details", (string?)"/Student/Queue"))" />
+<div class="screen" style="padding-top:.2rem" data-refresh="@(t.IsOpen ? 15 : 0)">
+    <partial name="_Flash" />
+    @if (existing)
+    {
+        <div class="flash flash-info"><partial name="_Icon" model="@("ticket")" /><span>You already had a ticket here, so we kept your place instead of making a new one.</span></div>
+    }
+
+    @if (alert && t.IsOpen)
+    {
+        <div class="bell-hero pulse" data-buzz="@(called ? t.Id : 0)"><div><partial name="_Icon" model="@(called ? "megaphone" : "bell")" /></div></div>
+        <div class="hero-title" style="font-size:1.4rem">@(called ? "It's your turn!" : "You're almost up!")</div>
+        <p class="center muted mt-1">
+            @if (called) { <text>Show ticket <b class="mono">@t.Number</b> at the counter.</text> }
+            else { <text>@(Model.Ahead == 0 ? "You're next." : $"{Model.Ahead} student{(Model.Ahead == 1 ? "" : "s")} ahead of you.")<br />Estimated wait: <b>~ @Model.EtaMinutes min</b></text> }
+        </p>
+        <div class="headto">
+            <div class="row"><partial name="_Icon" model="@("pin")" /><span class="muted">Please head to</span></div>
+            <div style="font-size:1.2rem;font-weight:800;margin-top:.2rem">@d.Name@(t.Counter is null ? "" : $" · {t.Counter}")</div>
+            <div class="muted small">@d.Location</div>
+            <a class="btn btn-outline btn-sm mt-1" href="@mapUrl" target="_blank" rel="noopener">View Map</a>
+        </div>
+        @if (t.OnTheWay)
+        {
+            <div class="btn btn-soft btn-lg btn-block" role="status"><partial name="_Icon" model="@("check")" /> The office knows you're on your way</div>
+        }
+        else
+        {
+            <form method="post" action="/Student/OnMyWay/@t.Id" asp-antiforgery="true"><button class="btn btn-primary btn-lg btn-block"><partial name="_Icon" model="@("walk")" /> I'm on my way</button></form>
+        }
+        <form method="post" action="/Student/Cancel/@t.Id" asp-antiforgery="true" class="center mt-2" data-confirm="Cancel ticket @t.Number? Your place goes to the next student.">
+            <span class="muted small">Not coming? </span><button class="link-btn small">Cancel Ticket</button>
+        </form>
+    }
+    else
+    {
+        <div class="hero-ic" style="@(closed && t.Status != TicketStatus.Completed ? "background:#8a978f;box-shadow:0 0 0 8px var(--grey-bg)" : "")"><partial name="_Icon" model="@(t.Status == TicketStatus.Completed ? "check" : closed ? "x" : "ticket")" /></div>
+        <div class="hero-title">
+            @(created ? "Your ticket has been created!" : serving ? "You're being served" : t.Status switch
+            {
+                TicketStatus.Completed => "Service completed",
+                TicketStatus.NoShow => "You missed your turn",
+                TicketStatus.Cancelled => "Ticket cancelled",
+                _ => "You're in the queue"
+            })
+        </div>
+        <p class="center muted small mt-1">@(created ? "Keep this number to track your progress." : serving ? $"At {d.Name}{(t.Counter is null ? "" : $", {t.Counter}")}." : closed ? "" : "This page updates by itself.")</p>
+
+        <div class="ticket-card">
+            <div class="row between">
+                <div><div class="xs muted">Ticket ID</div><div class="ticket-no mono">@t.Number</div></div>
+                <span class="pill @(t.IsOpen ? "pill-solid" : css)">@(t.IsOpen ? "Active" : label)</span>
+            </div>
+            <div class="divider" style="margin-bottom:0"></div>
+            <div class="kv"><partial name="_Icon" model="@d.Icon" /><div><div class="k">Department</div><div class="v">@d.Name</div></div></div>
+            <div class="kv"><partial name="_Icon" model="@("calendar")" /><div><div class="k">Batch / Time Window</div><div class="v">Batch @Model.Batch · @QueueService.Describe(t.WindowStart, t.WindowEnd, now)</div></div></div>
+            @if (t.IsOpen)
+            {
+                <div class="kv"><partial name="_Icon" model="@("position")" /><div><div class="k">Queue Position</div><div class="v">@Model.Position / @Model.WindowTotal</div></div></div>
+            }
+            @if (t.TransferredFrom is not null)
+            {
+                <div class="kv"><partial name="_Icon" model="@("arrow")" /><div><div class="k">Moved from</div><div class="v">@t.TransferredFrom</div></div></div>
+            }
+            @if (t.Resolution is not null)
+            {
+                <div class="kv"><partial name="_Icon" model="@("check")" /><div><div class="k">What the office said</div><div class="v" style="font-weight:600">@t.Resolution</div></div></div>
+            }
+        </div>
+
+        @if (t.Status == TicketStatus.Waiting)
+        {
+            <div class="eta">
+                <partial name="_Icon" model="@("clock")" />
+                <div>
+                    @if (Model.IsToday)
+                    {
+                        <b>Your turn is in ~ @Model.EtaMinutes min</b><span>You're in Batch @Model.Batch. Stay available.</span>
+                    }
+                    else
+                    {
+                        <b>Come on @t.WindowStart.ToString("dddd d MMM")</b><span>Batch @Model.Batch, @t.WindowStart.ToString("h:mm") – @t.WindowEnd.ToString("h:mm tt"). We'll remind you here.</span>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (t.IsOpen)
+        {
+            <a class="btn btn-primary btn-lg btn-block" href="/Student/Queue">View Queue Position</a>
+            @if (!serving)
+            {
+                <form method="post" action="/Student/Cancel/@t.Id" asp-antiforgery="true" class="mt-1" data-confirm="Cancel ticket @t.Number? Your place goes to the next student.">
+                    <button class="btn btn-outline btn-lg btn-block">Cancel Ticket</button>
+                </form>
+            }
+            <div class="note mt-2"><partial name="_Icon" model="@("info")" /><div>You'll be notified when your turn is approaching. Don't worry, you can do other things in the meantime.</div></div>
+        }
+        else
+        {
+            <a class="btn btn-primary btn-lg btn-block mt-2" href="/Student/Mode/@d.Id">Request @d.Name again</a>
+        }
+    }
+</div>

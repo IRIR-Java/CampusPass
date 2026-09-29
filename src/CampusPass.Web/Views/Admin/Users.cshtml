@@ -1,0 +1,101 @@
+@model UsersPage
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Users";
+    ViewData["Nav"] = "users";
+    var cred = (TempData["Credential"] as string)?.Split('|');
+}
+<div class="page-head">
+    <div><h1>Users</h1><p>Staff accounts, and student logins from Finance's fee records. Every new or reset password is one-time.</p></div>
+    <div class="seg"><a class="@(Model.Tab == "staff" ? "on" : "")" href="/Admin/Users">Staff</a><a class="@(Model.Tab == "students" ? "on" : "")" href="/Admin/Users?tab=students">Students</a></div>
+</div>
+
+@if (cred is { Length: 2 })
+{
+    <div class="cred" role="status">
+        <div class="row between"><b>One-time password for <span class="mono">@cred[0]</span></b><span class="xs" style="opacity:.8">Shown once. Give it to the person privately.</span></div>
+        <div class="mt-1"><span class="mono">@cred[1]</span></div>
+        <div class="xs mt-1" style="opacity:.8">They sign in with it and must choose their own password straight away.</div>
+    </div>
+}
+
+@if (Model.Tab == "staff")
+{
+    <div class="split">
+        <section class="card">
+            <div class="table-wrap"><table class="table">
+                <thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Department</th><th>Duty</th><th>Last sign-in</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var u in Model.Staff)
+                {
+                    <tr style="@(u.Disabled ? "opacity:.5" : "")">
+                        <td><div class="row" style="gap:.5rem"><span class="avatar" style="width:32px;height:32px;flex-basis:32px;font-size:.75rem">@Auth.Initials(u.DisplayName)</span>@u.DisplayName</div></td>
+                        <td class="mono small">@u.Username</td>
+                        <td><span class="pill @(u.Role == Role.Admin ? "pill-blue" : "pill-grey")">@(u.Role == Role.Admin ? "Admin" : "Staff")</span></td>
+                        <td class="small">@(u.Department?.Name ?? "–")@(u.Counter is null ? "" : $" · {u.Counter}")</td>
+                        <td>@if (u.Role == Role.Staff) { <form method="post" action="/Admin/ToggleDuty/@u.Id" asp-antiforgery="true"><button class="pill @(u.OnDuty ? "pill-green" : "pill-grey")" style="border:0;cursor:pointer">@(u.OnDuty ? "On duty" : "Off")</button></form> }</td>
+                        <td class="small muted">@(u.LastLoginAt?.ToString("d MMM, HH:mm") ?? "Never")@(u.MustChangePassword ? " · pending" : "")</td>
+                        <td class="right nowrap">
+                            <form method="post" action="/Admin/ResetPassword/@u.Id" asp-antiforgery="true" style="display:inline" data-confirm="Reset @u.DisplayName's password?"><button class="btn btn-light btn-sm">Reset password</button></form>
+                            <form method="post" action="/Admin/ToggleDisabled/@u.Id" asp-antiforgery="true" style="display:inline"><button class="btn btn-sm @(u.Disabled ? "btn-soft" : "btn-danger")">@(u.Disabled ? "Enable" : "Disable")</button></form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table></div>
+        </section>
+        <form class="card" method="post" asp-action="CreateStaff">
+            <div class="card-title">Add a staff member</div>
+            <div class="field"><label for="displayName">Full name</label><input class="input" id="displayName" name="displayName" required maxlength="120" placeholder="e.g. Ann Wanjiku" /></div>
+            <div class="field"><label for="username">Username</label><input class="input mono" id="username" name="username" required maxlength="30" placeholder="e.g. awanjiku" /></div>
+            <div class="form-grid" style="grid-template-columns:1fr 1fr">
+                <div class="field"><label for="role">Role</label><select class="select" id="role" name="role"><option value="Staff">Staff</option><option value="Admin">Admin</option></select></div>
+                <div class="field"><label for="counter">Counter</label><input class="input" id="counter" name="counter" maxlength="30" placeholder="Counter 1" /></div>
+            </div>
+            <div class="field"><label for="departmentId">Department (staff)</label><select class="select" id="departmentId" name="departmentId"><option value="">–</option>@foreach (var d in Model.Departments) { <option value="@d.Id">@d.Name</option> }</select></div>
+            <button class="btn btn-primary btn-block"><partial name="_Icon" model="@("plus")" />Create account</button>
+        </form>
+    </div>
+}
+else
+{
+    <div class="filters">
+        <form class="row" method="get"><input type="hidden" name="tab" value="students" /><div class="search" style="min-width:280px"><partial name="_Icon" model="@("search")" /><input class="input" name="q" value="@Model.Q" placeholder="Reg no or name" /></div><button class="btn btn-primary">Search</button></form>
+        <div class="spacer" style="flex:1"></div>
+        <span class="small muted">@Model.StudentTotal.ToString("N0") fee records · @Model.WithoutLogin.ToString("N0") without a login</span>
+        @if (Model.WithoutLogin > 0)
+        {
+            <form method="post" action="/Admin/IssueAll" asp-antiforgery="true" data-confirm="Create one-time passwords for @Model.WithoutLogin students? You'll download them as a CSV to send by SMS or email."><button class="btn btn-outline"><partial name="_Icon" model="@("download")" />Issue all logins (CSV)</button></form>
+        }
+    </div>
+    <section class="card">
+        @if (!Model.Students.Any())
+        {
+            <div class="empty"><partial name="_Icon" model="@("users")" />@(Model.StudentTotal == 0 ? "No fee records yet. Upload Finance's file under Fee records." : "No student matches.")</div>
+        }
+        else
+        {
+            <div class="table-wrap"><table class="table">
+                <thead><tr><th>Reg No</th><th>Name</th><th>Faculty</th><th>Fees</th><th>Login</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var (r, login) in Model.Students)
+                {
+                    <tr>
+                        <td class="mono small">@r.RegNo</td>
+                        <td>@r.Name</td>
+                        <td class="small">@r.Faculty</td>
+                        <td><span class="pill @(r.IsCleared ? "pill-green" : "pill-amber")">@(r.IsCleared ? "Cleared" : Fmt.Money(r.Balance))</span></td>
+                        <td class="small muted">@(login is null ? "None" : login.MustChangePassword ? "Issued (not yet used)" : $"Active · {login.LastLoginAt:d MMM}")</td>
+                        <td class="right">
+                            <form method="post" action="/Admin/IssueLogin" asp-antiforgery="true" data-confirm="@(login is null ? "" : $"Reset {r.Name}'s password?")">
+                                <input type="hidden" name="regNo" value="@r.RegNo" /><input type="hidden" name="q" value="@Model.Q" />
+                                <button class="btn btn-sm @(login is null ? "btn-soft" : "btn-light")">@(login is null ? "Issue login" : "Reset password")</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table></div>
+        }
+    </section>
+}

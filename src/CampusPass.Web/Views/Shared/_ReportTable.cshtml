@@ -1,0 +1,21 @@
+@model IReadOnlyList<DeptReport>
+@{
+    var max = Math.Max(1, Model.Select(r => r.Requests).DefaultIfEmpty(0).Max());
+}
+<div class="table-wrap"><table class="table">
+    <thead><tr><th>Department</th><th style="min-width:160px">Requests</th><th>Served</th><th>Missed</th><th>Cancelled</th><th>Avg wait</th><th>Avg service</th></tr></thead>
+    <tbody>
+    @foreach (var r in Model)
+    {
+        <tr>
+            <td><div class="row" style="gap:.5rem"><span class="tile-ic t-@r.Department.Color" style="width:30px;height:30px;flex-basis:30px;border-radius:8px"><partial name="_Icon" model="@r.Department.Icon" /></span>@r.Department.Name</div></td>
+            <td><div class="row" style="gap:.5rem"><div class="progress grow" style="height:8px"><span style="width:@(100 * r.Requests / max)%"></span></div><b>@r.Requests</b></div></td>
+            <td>@r.Completed</td>
+            <td>@r.NoShow</td>
+            <td>@r.Cancelled</td>
+            <td>@(r.AvgWait is double w ? $"{w:0} min" : "–")</td>
+            <td>@(r.AvgService is double s ? $"{s:0.#} min" : "–")</td>
+        </tr>
+    }
+    </tbody>
+</table></div>

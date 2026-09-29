@@ -1,0 +1,26 @@
+@model SystemSettings
+@{
+    Layout = "_Student";
+    ViewData["Title"] = "Help & Support";
+    ViewData["Tab"] = "profile";
+}
+<partial name="_Bar" model="@(("Help & Support", (string?)"/Student/Profile"))" />
+<div class="screen" style="padding-top:.2rem">
+    <div class="note"><partial name="_Icon" model="@("info")" /><div><b>Contact</b><br />@Model.SupportContact</div></div>
+    <div class="section">Questions students ask</div>
+    @foreach (var (q, a) in new[]
+    {
+        ("How do I get my gatepass?", "If your fees are cleared, it's already in the app: Home → Fees cleared, or Profile → My Gatepass. Show the QR at the gate."),
+        ("I paid but my balance hasn't changed.", "Balances update when Finance uploads the bank records. If it's been over a day, request the Finance service and bring your bank slip reference."),
+        ("What is a batch?", "A time window, like Tue 2:00–3:00 PM. Come during your batch, not before. You'll be notified when you're almost up."),
+        ("Queue or appointment?", "Join Queue gives you the next free batch. Book Appointment lets you pick a time that suits you."),
+        ("What if I'm sent to the wrong office?", "Staff move your ticket to the right office. You keep the same ticket number, so you don't start again."),
+        ("Can I cancel?", "Yes. Open the ticket and tap Cancel Ticket. Your place goes to the next student.")
+    })
+    {
+        <details class="card" style="box-shadow:none;border:1px solid var(--line);margin-bottom:.6rem">
+            <summary style="font-weight:600;cursor:pointer">@q</summary>
+            <p class="small muted mt-1 mb-0">@a</p>
+        </details>
+    }
+</div>

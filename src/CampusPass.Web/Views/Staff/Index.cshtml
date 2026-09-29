@@ -1,0 +1,54 @@
+@model StaffDashPage
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Staff Dashboard";
+    ViewData["Nav"] = "dashboard";
+    var s = Model.Stats;
+    var first = Model.Me.DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+}
+<div data-refresh="30"></div>
+<div class="page-head">
+    <div><h1>Staff Dashboard</h1><p>Welcome back, @first. Manage the @Model.Me.Department?.Name queue and serve students efficiently.</p></div>
+    <span class="pill @(Model.Me.OnDuty ? "pill-green" : "pill-grey")">@(Model.Me.OnDuty ? "On duty" : "Off duty")@(Model.Me.Counter is null ? "" : $" · {Model.Me.Counter}")</span>
+</div>
+
+@if (Model.Current is Ticket cur)
+{
+    <a class="active-banner mb-2" href="/Staff/Serve" style="margin-top:0">
+        <span class="tile-ic t-green"><partial name="_Icon" model="@("megaphone")" /></span>
+        <div class="grow"><b>You're serving <span class="mono">@cur.Number</span> · @cur.StudentName</b><div class="small muted">Tap to continue</div></div>
+        <partial name="_Icon" model="@("chev")" />
+    </a>
+}
+
+<div class="kpis">
+    <div class="kpi"><span class="tile-ic t-green"><partial name="_Icon" model="@("queue")" /></span><div><div class="n">@s.Waiting</div><div class="l">Waiting today</div></div></div>
+    <div class="kpi"><span class="tile-ic t-blue"><partial name="_Icon" model="@("megaphone")" /></span><div><div class="n">@s.InService</div><div class="l">In Service</div></div></div>
+    <div class="kpi"><span class="tile-ic t-purple"><partial name="_Icon" model="@("check")" /></span><div><div class="n">@s.ServedToday</div><div class="l">Served Today (you: @s.ServedByMe)</div></div></div>
+    <div class="kpi"><span class="tile-ic t-amber"><partial name="_Icon" model="@("calendar")" /></span><div><div class="n">@s.LaterDays</div><div class="l">Booked for later days</div></div></div>
+</div>
+
+<div class="split">
+    <section class="card">
+        <div class="row between mb-1"><div class="card-title mb-0">Current Queue</div><a class="small" href="/Staff/Queue">View all</a></div>
+        <partial name="_QueueTable" model="@(Model.Queue.Take(8).ToList())" />
+    </section>
+    <div>
+        <section class="card">
+            <div class="card-title">Quick Actions</div>
+            <div class="qa">
+                <form method="post" action="/Staff/CallNext" asp-antiforgery="true"><button class="primary"><partial name="_Icon" model="@("megaphone")" />Call Next Student</button></form>
+                <a href="/Staff/Tickets"><partial name="_Icon" model="@("ticket")" />View All Tickets</a>
+                <a href="/Staff/Students"><partial name="_Icon" model="@("users")" />Look Up a Student</a>
+                <a href="/Staff/Settings"><partial name="_Icon" model="@("settings")" />Duty &amp; Counter</a>
+            </div>
+        </section>
+        <section class="card">
+            <div class="card-title">Today's Performance</div>
+            <div class="row between"><div><div style="font-size:1.8rem;font-weight:800">@s.OnTrackPercent%</div><div class="small muted">Served within their batch</div></div>
+                <span class="pill @(s.OnTrackPercent >= 80 ? "pill-green" : "pill-amber")">@(s.OnTrackPercent >= 80 ? "On track" : "Behind")</span></div>
+            <div class="progress mt-1"><span style="width:@s.OnTrackPercent%"></span></div>
+            <p class="small muted mt-1 mb-0">Average wait after the batch starts: <b>@(s.AvgWaitMinutes is double w ? $"{w:0} min" : "–")</b></p>
+        </section>
+    </div>
+</div>

@@ -1,0 +1,22 @@
+@model IReadOnlyList<DeptReport>
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Reports";
+    ViewData["Nav"] = "reports";
+    var days = (int)ViewData["Days"]!;
+    var req = Model.Sum(r => r.Requests);
+    var done = Model.Sum(r => r.Completed);
+    var missed = Model.Sum(r => r.NoShow);
+    var waits = Model.Where(r => r.AvgWait.HasValue).Select(r => r.AvgWait!.Value).ToList();
+}
+<div class="page-head">
+    <div><h1>Reports</h1><p>Requests and service times by department.</p></div>
+    <div class="seg">@foreach (var d in new[] { 1, 7, 30 }) { <a class="@(days == d ? "on" : "")" href="?days=@d">@(d == 1 ? "Today" : $"{d} days")</a> }</div>
+</div>
+<div class="kpis">
+    <div class="kpi"><span class="tile-ic t-green"><partial name="_Icon" model="@("ticket")" /></span><div><div class="n">@req</div><div class="l">Requests</div></div></div>
+    <div class="kpi"><span class="tile-ic t-purple"><partial name="_Icon" model="@("check")" /></span><div><div class="n">@done</div><div class="l">Served</div></div></div>
+    <div class="kpi"><span class="tile-ic t-red"><partial name="_Icon" model="@("x")" /></span><div><div class="n">@missed</div><div class="l">Missed (no-show)</div></div></div>
+    <div class="kpi"><span class="tile-ic t-amber"><partial name="_Icon" model="@("clock")" /></span><div><div class="n">@(waits.Any() ? $"{waits.Average():0}" : "–")</div><div class="l">Avg wait (min)</div></div></div>
+</div>
+<section class="card"><partial name="_ReportTable" model="Model" /></section>

@@ -1,0 +1,50 @@
+@model BatchesPage
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Batches";
+    ViewData["Nav"] = "batches";
+    var s = Model.Settings;
+}
+<div class="page-head"><div><h1>Batches</h1><p>Smart batching: every day is split into time windows, and each window takes as many students as the staff on duty can serve.</p></div></div>
+<div class="split-even">
+    <form class="card" method="post" asp-action="SaveHours">
+        <div class="card-title">Opening hours &amp; windows</div>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr">
+            <div class="field"><label for="open">Opens</label><input class="input" type="time" id="open" name="open" value="@s.OpenTime.ToString("HH:mm")" required /></div>
+            <div class="field"><label for="close">Closes</label><input class="input" type="time" id="close" name="close" value="@s.CloseTime.ToString("HH:mm")" required /></div>
+            <div class="field"><label for="lunchStart">Lunch from</label><input class="input" type="time" id="lunchStart" name="lunchStart" value="@s.LunchStart.ToString("HH:mm")" required /></div>
+            <div class="field"><label for="lunchEnd">Lunch to</label><input class="input" type="time" id="lunchEnd" name="lunchEnd" value="@s.LunchEnd.ToString("HH:mm")" required /></div>
+            <div class="field"><label for="windowMinutes">Batch length (minutes)</label><input class="input" type="number" id="windowMinutes" name="windowMinutes" value="@s.WindowMinutes" min="15" max="240" required /></div>
+            <div class="field"><label for="bookingDaysAhead">Bookable days ahead</label><input class="input" type="number" id="bookingDaysAhead" name="bookingDaysAhead" value="@s.BookingDaysAhead" min="1" max="30" required /></div>
+        </div>
+        <div class="field"><label for="holidays">Public holidays (yyyy-MM-dd, comma separated)</label><textarea class="textarea" id="holidays" name="holidays" style="min-height:70px" placeholder="2026-10-20, 2026-12-12">@s.Holidays.Replace(",", ", ")</textarea></div>
+        <button class="btn btn-primary">Save</button>
+        <div class="divider"></div>
+        <div class="card-title">A service day looks like this</div>
+        <div class="chips">@foreach (var w in Model.SampleDay) { <span class="chip" style="cursor:default">Batch @w.Batch · @w.Start.ToString("h:mm")–@w.End.ToString("h:mm tt")</span> }</div>
+        <p class="small muted mb-0">Batch size = staff on duty × @s.WindowMinutes min ÷ the service's average minutes. For example, 4 Finance officers at 5 min each take @(4 * s.WindowMinutes / 5) students per batch.</p>
+    </form>
+
+    <section class="card">
+        <div class="card-title">Faculty registration days</div>
+        <p class="small muted">From the Finance Officer's registration memo. A student who joins the queue is never booked before their faculty's day, which spreads the load instead of everyone arriving on day one.</p>
+        @if (Model.FacultyDays.Any())
+        {
+            <table class="table mb-2">
+                <thead><tr><th>Faculty</th><th>Day</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var f in Model.FacultyDays)
+                {
+                    <tr><td>@f.Faculty</td><td class="nowrap">@f.Date.ToString("ddd d MMM yyyy")</td><td class="right"><form method="post" action="/Admin/RemoveFacultyDay/@f.Id" asp-antiforgery="true"><button class="btn btn-light btn-sm">Remove</button></form></td></tr>
+                }
+                </tbody>
+            </table>
+        }
+        <form method="post" asp-action="AddFacultyDay" class="form-grid" style="grid-template-columns:2fr 1fr auto;align-items:end">
+            <div class="field"><label for="faculty">Faculty</label><input class="input" id="faculty" name="faculty" list="faculties" required placeholder="As written in Finance's file" /></div>
+            <div class="field"><label for="date">Date</label><input class="input" type="date" id="date" name="date" required /></div>
+            <div class="field"><button class="btn btn-primary"><partial name="_Icon" model="@("plus")" />Add</button></div>
+            <datalist id="faculties">@foreach (var f in Model.Faculties) { <option value="@f"></option> }</datalist>
+        </form>
+    </section>
+</div>

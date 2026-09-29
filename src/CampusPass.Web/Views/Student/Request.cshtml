@@ -1,0 +1,25 @@
+@model IReadOnlyList<Department>
+@{
+    Layout = "_Student";
+    ViewData["Title"] = "Request Service";
+    ViewData["Tab"] = "home";
+}
+<partial name="_Bar" model="@(("Request Service", (string?)"/Student"))" />
+<div class="screen" style="padding-top:.2rem">
+    <partial name="_Steps" model="1" />
+    <div class="section" style="margin-top:0">Select a Service Category</div>
+    <div class="search mb-2">
+        <partial name="_Icon" model="@("search")" />
+        <input class="input" type="search" placeholder="Search for a service..." data-filter=".list-item" aria-label="Search for a service" />
+    </div>
+    @foreach (var s in Model)
+    {
+        <a class="list-item" href="/Student/Mode/@s.Id" data-text="@s.Name @s.Description">
+            <span class="tile-ic t-@s.Color"><partial name="_Icon" model="@s.Icon" /></span>
+            <div class="grow"><b>@s.Name</b><span>@s.Description</span></div>
+            <span class="chev"><partial name="_Icon" model="@("chev")" /></span>
+        </a>
+    }
+    <p class="empty hide" data-empty>No service matches that.</p>
+    <div class="note mt-2"><partial name="_Icon" model="@("info")" /><div><b>Not sure which one?</b><br />Choose <b>Other</b> and describe your problem. Staff will send you to the right office, and you keep your place.</div></div>
+</div>

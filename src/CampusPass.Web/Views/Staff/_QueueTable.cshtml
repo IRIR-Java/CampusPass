@@ -1,0 +1,42 @@
+@model IReadOnlyList<Ticket>
+@if (!Model.Any())
+{
+    <div class="empty"><partial name="_Icon" model="@("queue")" />Nobody is waiting today.</div>
+}
+else
+{
+    var perWindow = Model.GroupBy(t => t.WindowStart).ToDictionary(g => g.Key, g => g.Count());
+    var positions = Model.GroupBy(t => t.WindowStart).SelectMany(g => g.Select((t, i) => (t.Id, i + 1))).ToDictionary(x => x.Id, x => x.Item2);
+    <div class="table-wrap">
+        <table class="table">
+            <thead><tr><th>#</th><th>Ticket ID</th><th>Student</th><th>Reg No</th><th>Batch</th><th>Position</th><th>Status</th><th class="right">Action</th></tr></thead>
+            <tbody>
+            @{ var i = 0; }
+            @foreach (var t in Model)
+            {
+                i++;
+                var (label, css) = Fmt.Status(t.Status);
+                <tr class="@(t.Status != TicketStatus.Waiting ? "hl" : "")">
+                    <td class="muted">@i</td>
+                    <td class="mono" style="font-weight:700">@t.Number</td>
+                    <td>@t.StudentName @if (t.OnTheWay) { <span class="pill pill-blue" title="Student tapped I'm on my way">On the way</span> }</td>
+                    <td class="mono small">@t.RegNo</td>
+                    <td class="nowrap">@t.WindowStart.ToString("h:mm") – @t.WindowEnd.ToString("h:mm tt")</td>
+                    <td>@positions[t.Id]/@perWindow[t.WindowStart]</td>
+                    <td><span class="pill @css">@label</span></td>
+                    <td class="right">
+                        @if (t.Status == TicketStatus.Waiting)
+                        {
+                            <form method="post" action="/Staff/Call/@t.Id" asp-antiforgery="true"><button class="btn btn-soft btn-sm">Call</button></form>
+                        }
+                        else
+                        {
+                            <span class="small muted">@t.StaffName</span>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

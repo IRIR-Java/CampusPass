@@ -1,0 +1,24 @@
+@model SetupForm
+@{ ViewData["Title"] = "Set up CampusPass"; }
+<div class="auth">
+    <div class="auth-box" style="max-width:520px">
+        <div class="brand-row"><span class="brand-mark"><partial name="_Icon" model="@("ticket")" /></span><div><div class="brand-inst">First-time setup</div><div class="brand-name" style="font-size:2rem">Campus<em>Pass</em></div></div></div>
+        <form method="post" class="card mt-2" asp-action="Index">
+            @if (ViewData["Error"] is string err) { <div class="flash flash-error"><partial name="_Icon" model="@("alert")" /><span>@err</span></div> }
+            <div class="field"><label for="Code">Setup code</label><input class="input mono" id="Code" name="Code" value="@Model.Code" required autocomplete="off" /><div class="hint">Printed in the server log when CampusPass starts for the first time.</div></div>
+            <div class="field"><label for="Institution">Institution name</label><input class="input" id="Institution" name="Institution" value="@Model.Institution" required placeholder="e.g. Chuka University" /></div>
+            <div class="form-grid">
+                <div class="field"><label for="Semester">Semester</label><input class="input" id="Semester" name="Semester" value="@Model.Semester" placeholder="Sep–Dec 2026" /></div>
+                <div class="field"><label for="PassValidUntil">Gatepasses valid until</label><input class="input" type="date" id="PassValidUntil" name="PassValidUntil" value="@Model.PassValidUntil.ToString("yyyy-MM-dd")" required /></div>
+            </div>
+            <div class="divider"></div>
+            <div class="form-grid">
+                <div class="field"><label for="AdminName">Administrator's name</label><input class="input" id="AdminName" name="AdminName" value="@Model.AdminName" required /></div>
+                <div class="field"><label for="AdminUsername">Admin username</label><input class="input" id="AdminUsername" name="AdminUsername" value="@Model.AdminUsername" required /></div>
+            </div>
+            <div class="field"><label for="Password">Admin password (12+ characters)</label><input class="input" type="password" id="Password" name="Password" minlength="12" required autocomplete="new-password" /></div>
+            <button class="btn btn-primary btn-lg btn-block">Create CampusPass</button>
+            <p class="hint center mt-1">The six common service departments are created for you. You can edit them in Admin → Services.</p>
+        </form>
+    </div>
+</div>

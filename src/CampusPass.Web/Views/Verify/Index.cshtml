@@ -1,0 +1,42 @@
+@model VerifyResult?
+@{
+    ViewData["Title"] = "Gatepass check";
+    var ok = Model?.Outcome == VerifyOutcome.Valid;
+    var reason = Model?.Outcome switch
+    {
+        VerifyOutcome.Invalid => "Not a genuine CampusPass code. It may be edited, copied from a picture, or fake.",
+        VerifyOutcome.NotFound => "This code was not issued by CampusPass.",
+        VerifyOutcome.Expired => "This gatepass has expired.",
+        _ => "Fees are not cleared. The student should open CampusPass to see what to pay."
+    };
+}
+@section Head { <meta name="robots" content="noindex" /> }
+<div class="auth">
+    <div class="auth-box" style="max-width:460px">
+        @if (Model is null)
+        {
+            <div class="card center"><span class="tile-ic t-green" style="margin:0 auto .6rem"><partial name="_Icon" model="@("qr")" /></span><h1 style="font-size:1.25rem">Gatepass check</h1><p class="muted mt-1 mb-0">Point your phone's normal camera at a student's CampusPass QR code. The result opens here. No app or login needed.</p></div>
+        }
+        else
+        {
+            <section class="verify @(ok ? "verify-ok" : "verify-bad")">
+                <div class="big"><partial name="_Icon" model="@(ok ? "check" : "x")" />@(ok ? "VALID" : "NOT VALID")</div>
+                @if (ok)
+                {
+                    <div class="who"><div style="font-size:1.35rem;font-weight:800">@Model.Student!.Name</div><div class="mono" style="font-size:1.1rem">@Model.Student.RegNo</div><div style="opacity:.85">@Model.Student.Faculty</div></div>
+                    <p class="mt-2 mb-0">Compare the name with the student's ID card.</p>
+                    <p class="small" style="opacity:.85">@Model.Pass!.Semester · valid until @Model.Pass.ExpiresAt.ToString("d MMM yyyy") · @Model.Pass.Serial</p>
+                }
+                else
+                {
+                    <p style="font-size:1.05rem" class="mt-1">@reason</p>
+                    @if (Model.Student is not null)
+                    {
+                        <div class="who"><div class="small" style="opacity:.85">Pass belongs to</div><div style="font-weight:800">@Model.Student.Name</div><div class="mono">@Model.Student.RegNo</div></div>
+                    }
+                }
+                <p class="small mt-2 mb-0" style="opacity:.8">Checked @(((DateTime)ViewData["CheckedAt"]!).ToString("d MMM yyyy, HH:mm:ss"))</p>
+            </section>
+        }
+    </div>
+</div>

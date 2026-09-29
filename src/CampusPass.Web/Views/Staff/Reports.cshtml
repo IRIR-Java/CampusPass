@@ -1,0 +1,22 @@
+@model IReadOnlyList<DeptReport>
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Reports";
+    ViewData["Nav"] = "reports";
+    var days = (int)ViewData["Days"]!;
+    var r = Model.FirstOrDefault();
+}
+<div class="page-head">
+    <div><h1>Reports</h1><p>How your department is doing.</p></div>
+    <div class="seg">@foreach (var d in new[] { 1, 7, 30 }) { <a class="@(days == d ? "on" : "")" href="?days=@d">@(d == 1 ? "Today" : $"{d} days")</a> }</div>
+</div>
+@if (r is not null)
+{
+    <div class="kpis">
+        <div class="kpi"><span class="tile-ic t-green"><partial name="_Icon" model="@("ticket")" /></span><div><div class="n">@r.Requests</div><div class="l">Requests</div></div></div>
+        <div class="kpi"><span class="tile-ic t-purple"><partial name="_Icon" model="@("check")" /></span><div><div class="n">@r.Completed</div><div class="l">Served</div></div></div>
+        <div class="kpi"><span class="tile-ic t-amber"><partial name="_Icon" model="@("clock")" /></span><div><div class="n">@(r.AvgWait is double w ? $"{w:0}" : "–")</div><div class="l">Avg wait (min)</div></div></div>
+        <div class="kpi"><span class="tile-ic t-blue"><partial name="_Icon" model="@("megaphone")" /></span><div><div class="n">@(r.AvgService is double s ? $"{s:0.#}" : "–")</div><div class="l">Avg service (min)</div></div></div>
+    </div>
+}
+<section class="card"><partial name="_ReportTable" model="Model" /></section>

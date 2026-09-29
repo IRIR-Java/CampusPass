@@ -1,0 +1,114 @@
+@model ServePage
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Call Next";
+    ViewData["Nav"] = "serve";
+    var t = Model.Current;
+    var fee = Model.Fee;
+    var replies = Model.Me.Department?.Code switch
+    {
+        "FIN" => new[] { "Payment confirmed. Your balance updates after the next Finance upload.", "Payment not found. Bring the bank slip to Finance.", "Balance explained. Pay the rest at the bank with your reg no as reference." },
+        "ICT" => new[] { "Password reset. Log in to the portal again now.", "Portal record fixed. Try again now.", "Known portal outage. Try again later today." },
+        "GP" => new[] { "Gatepass checked and valid.", "Replacement ID ordered. Collect at Security in 2 days." },
+        "ACA" => new[] { "Exam card issued.", "Results issue logged with the department. We'll notify you." },
+        "ADM" => new[] { "Document ready. Collect it at the office.", "Request received. Ready in 3 working days." },
+        _ => new[] { "Answered. No further action needed.", "Sent to the right office." }
+    };
+}
+<div class="page-head">
+    <div><h1>Call Next</h1><p>@Model.Me.Department?.Name@(Model.Me.Counter is null ? "" : $" · {Model.Me.Counter}") · @Model.WaitingCount waiting today</p></div>
+</div>
+
+<div class="serve">
+    <div>
+        @if (t is null)
+        {
+            <section class="card center" style="padding:2rem 1.2rem">
+                <span class="tile-ic t-green" style="margin:0 auto .8rem;width:64px;height:64px;border-radius:18px"><partial name="_Icon" model="@("megaphone")" /></span>
+                <h2 style="font-size:1.2rem">Ready for the next student?</h2>
+                <p class="muted">Calls the first student in today's queue and notifies their phone.</p>
+                <form method="post" action="/Staff/CallNext" asp-antiforgery="true"><button class="btn btn-primary btn-block call-btn" @(Model.WaitingCount == 0 ? "disabled" : "")><partial name="_Icon" model="@("megaphone")" />Call Next Student</button></form>
+                @if (Model.WaitingCount == 0) { <p class="small muted mt-1 mb-0">Nobody is waiting right now. This page refreshes by itself.</p> <div data-refresh="15"></div> }
+            </section>
+        }
+        else
+        {
+            <section class="card serve-card">
+                <div class="row between row-top">
+                    <div class="row">
+                        <span class="tile-ic t-green"><partial name="_Icon" model="@("ticket")" /></span>
+                        <div><div class="num mono">@t.Number</div><div class="muted small">@t.StudentName · @t.Department!.Name</div></div>
+                    </div>
+                    <span class="pill @(t.Status == TicketStatus.Serving ? "pill-green" : "pill-blue")">@(t.Status == TicketStatus.Serving ? "In service" : "Called")</span>
+                </div>
+
+                @if (t.Status == TicketStatus.Called)
+                {
+                    <div class="row mt-2" style="gap:.6rem">
+                        <form method="post" action="/Staff/Start/@t.Id" asp-antiforgery="true" class="grow"><button class="btn btn-primary btn-block call-btn"><partial name="_Icon" model="@("check")" />Start Service</button></form>
+                        <form method="post" action="/Staff/Recall/@t.Id" asp-antiforgery="true"><button class="btn btn-outline call-btn" title="Notify the student again"><partial name="_Icon" model="@("bell")" />Call again</button></form>
+                    </div>
+                    <div class="note mt-1"><partial name="_Icon" model="@("info")" /><div>The student has been notified@(t.OnTheWay ? " and said they're on their way" : ""). Start the service once they reach the counter.</div></div>
+                }
+
+                <div class="card-title mt-2">Student Details</div>
+                <dl class="dl">
+                    <dt>Name</dt><dd>@t.StudentName</dd>
+                    <dt>Reg No</dt><dd class="mono">@t.RegNo</dd>
+                    <dt>Phone</dt><dd>@(fee?.Record.Phone ?? "–")</dd>
+                    <dt>Faculty</dt><dd>@(fee?.Record.Faculty ?? "–")</dd>
+                    <dt>Batch</dt><dd>@Model.Calendar.BatchOf(t.WindowStart) · @t.WindowStart.ToString("ddd h:mm") – @t.WindowEnd.ToString("h:mm tt")</dd>
+                    <dt>Mode</dt><dd>@(t.Mode == TicketMode.Appointment ? "Appointment" : "Queue")</dd>
+                    @if (t.TransferredFrom is not null) { <dt>Sent from</dt><dd>@t.TransferredFrom</dd> }
+                </dl>
+                @if (fee is null)
+                {
+                    <div class="fee fee-none"><b>No fee record</b> for this student in Finance's data.</div>
+                }
+                else if (fee.Cleared)
+                {
+                    <div class="fee fee-ok"><b>Fees cleared</b> · paid @Fmt.Money(fee.Record.Paid) of @Fmt.Money(fee.Record.TotalFee)@(fee.Pass is null ? "" : " · has a gatepass")</div>
+                }
+                else
+                {
+                    <div class="fee fee-owe"><b>Owes @Fmt.Money(fee.Record.Balance)</b> · paid @Fmt.Money(fee.Record.Paid) of @Fmt.Money(fee.Record.TotalFee)@(fee.Stale ? " · figures over 2 days old" : "")</div>
+                }
+                <div class="label">Issue described by the student</div>
+                <p class="mb-2">@(t.Description ?? "No description given.")</p>
+
+                <form method="post" action="/Staff/Complete/@t.Id" asp-antiforgery="true">
+                    <div class="label">Reply to the student (tap one, or type)</div>
+                    <div class="chips">@foreach (var r in replies) { <button type="button" class="chip" data-chip="@r">@r</button> }</div>
+                    <textarea class="textarea" id="note" name="note" maxlength="1000" placeholder="Optional. Leave empty and the student sees &quot;Served by @t.Department.Name&quot;."></textarea>
+                    <div class="row mt-1" style="gap:.6rem">
+                        <button class="btn btn-light grow" name="next" value="false">Complete</button>
+                        <button class="btn btn-primary grow" name="next" value="true">Complete &amp; Call Next</button>
+                    </div>
+                </form>
+
+                <details class="mt-2">
+                    <summary class="small" style="cursor:pointer;color:var(--g700);font-weight:600">Wrong office, or student not here?</summary>
+                    <form method="post" action="/Staff/Transfer/@t.Id" asp-antiforgery="true" class="row mt-1">
+                        <select class="select grow" name="to" aria-label="Send to">@foreach (var o in Model.Others) { <option value="@o.Id">Send to @o.Name</option> }</select>
+                        <button class="btn btn-outline">Transfer</button>
+                    </form>
+                    @if (t.Status == TicketStatus.Called)
+                    {
+                        <form method="post" action="/Staff/NoShow/@t.Id" asp-antiforgery="true" class="mt-1"><button class="btn btn-danger btn-block">Student not here (no-show)</button></form>
+                    }
+                    <p class="hint">Transferring keeps the student's ticket number. They don't start again.</p>
+                </details>
+            </section>
+        }
+    </div>
+    <section class="card">
+        <div class="card-title">Next up</div>
+        @if (!Model.NextUp.Any()) { <p class="muted mb-0">Nobody waiting.</p> }
+        <ul class="activity">
+            @foreach (var n in Model.NextUp)
+            {
+                <li><span class="mono" style="font-weight:700;min-width:70px">@n.Number</span><span class="grow">@n.StudentName</span><span class="xs muted">@n.WindowStart.ToString("h:mm tt")</span></li>
+            }
+        </ul>
+    </section>
+</div>

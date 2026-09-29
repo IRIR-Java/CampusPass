@@ -1,0 +1,29 @@
+@model SystemSettings
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Settings";
+    ViewData["Nav"] = "settings";
+}
+<div class="page-head"><div><h1>Settings</h1><p>Institution details, semester and what students see.</p></div></div>
+<div class="split-even">
+    <form class="card" method="post" asp-action="Settings">
+        <div class="field"><label for="institutionName">Institution name</label><input class="input" id="institutionName" name="institutionName" value="@Model.InstitutionName" required maxlength="120" /></div>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr">
+            <div class="field"><label for="semester">Semester</label><input class="input" id="semester" name="semester" value="@Model.Semester" maxlength="60" /></div>
+            <div class="field"><label for="passValidUntil">Gatepasses valid until</label><input class="input" type="date" id="passValidUntil" name="passValidUntil" value="@Model.PassValidUntil.ToString("yyyy-MM-dd")" required /></div>
+        </div>
+        <div class="field"><label for="paymentInstructions">How to pay (shown to students who owe)</label><textarea class="textarea" id="paymentInstructions" name="paymentInstructions" maxlength="500">@Model.PaymentInstructions</textarea></div>
+        <div class="field"><label for="supportContact">Help &amp; support contact</label><input class="input" id="supportContact" name="supportContact" value="@Model.SupportContact" maxlength="200" /></div>
+        <button class="btn btn-primary">Save settings</button>
+    </form>
+    <section class="card">
+        <div class="card-title">Security</div>
+        <ul class="small muted" style="padding-left:1.1rem;margin:0">
+            <li>Passwords: PBKDF2-SHA512 (210,000 iterations), 5 failed attempts lock an account for 5 minutes.</li>
+            <li>Gatepass QR codes are signed (HMAC-SHA256) and checked against live fee data at the gate.</li>
+            <li>Every issued password is one-time; people must choose their own at first sign-in.</li>
+            <li>Changing "valid until" updates all active gatepasses.</li>
+        </ul>
+        <a class="btn btn-light mt-2" href="/Account/ChangePassword"><partial name="_Icon" model="@("key")" />Change my password</a>
+    </section>
+</div>

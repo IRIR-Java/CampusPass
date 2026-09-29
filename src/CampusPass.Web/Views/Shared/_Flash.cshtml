@@ -1,0 +1,7 @@
+@foreach (var (key, css, icon) in new[] { ("Success", "success", "check"), ("Error", "error", "alert"), ("Info", "info", "info") })
+{
+    if (TempData[key] is string msg)
+    {
+        <div class="flash flash-@css" role="status"><partial name="_Icon" model="@icon" /><span>@msg</span></div>
+    }
+}

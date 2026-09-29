@@ -1,0 +1,66 @@
+@model QueuePage
+@{
+    Layout = "_Student";
+    ViewData["Title"] = "My Queue";
+    ViewData["Tab"] = "tickets";
+    var now = Model.Clock.Now;
+    var live = Model.Live;
+}
+<partial name="_Bar" model="@(("My Queue", (string?)"/Student"))" />
+<div class="screen" style="padding-top:.2rem" data-refresh="@(Model.Tab == "active" && Model.Tickets.Any() ? 20 : 0)">
+    <partial name="_Flash" />
+    <nav class="tabs">
+        <a class="@(Model.Tab == "active" ? "on" : "")" href="/Student/Queue">Active</a>
+        <a class="@(Model.Tab == "history" ? "on" : "")" href="/Student/Queue?tab=history">History</a>
+        <a class="@(Model.Tab == "completed" ? "on" : "")" href="/Student/Queue?tab=completed">Completed</a>
+    </nav>
+
+    @if (!Model.Tickets.Any())
+    {
+        <div class="empty">
+            <partial name="_Icon" model="@("ticket")" />
+            @(Model.Tab switch { "history" => "No cancelled or missed tickets.", "completed" => "Nothing completed yet.", _ => "You're not in any queue right now." })
+            @if (Model.Tab == "active") { <div class="mt-2"><a class="btn btn-primary" href="/Student/Request">Request a service</a></div> }
+        </div>
+    }
+
+    @foreach (var t in Model.Tickets)
+    {
+        var (label, css) = Fmt.Status(t.Status);
+        var isLive = live?.Ticket.Id == t.Id;
+        <a class="card" href="/Student/Ticket/@t.Id" style="display:block;color:inherit;text-decoration:none;border:1px solid @(isLive ? "var(--g200)" : "var(--line)");box-shadow:none;margin-bottom:.7rem">
+            <div class="row">
+                <span class="tile-ic t-@t.Department!.Color"><partial name="_Icon" model="@t.Department.Icon" /></span>
+                <div class="grow">
+                    <div class="row between"><b class="mono" style="font-size:1.15rem">@t.Number</b><span class="pill @(t.IsOpen ? "pill-green" : css)">@(t.IsOpen ? (t.Status == TicketStatus.Waiting ? "Active" : label) : label)</span></div>
+                    <div class="small muted">@t.Department.Name · @Fmt.Window(t.WindowStart, t.WindowEnd)</div>
+                </div>
+            </div>
+            @if (isLive && live!.WindowTotal > 0)
+            {
+                var pct = (int)Math.Round(100.0 * live.ServedInWindow / live.WindowTotal);
+                <div class="row between xs muted mt-1"><span>Batch @live.Batch progress</span><span>@live.ServedInWindow of @live.WindowTotal served</span></div>
+                <div class="progress mt-0" style="margin-top:.3rem"><span style="width:@(Math.Max(4, pct))%"></span></div>
+            }
+            @if (!t.IsOpen && t.Resolution is not null) { <div class="small mt-1">“@t.Resolution”</div> }
+        </a>
+    }
+
+    @if (live is not null)
+    {
+        <div class="section">Live Queue · Batch @live.Batch</div>
+        <ul class="live">
+            @foreach (var r in live.Live)
+            {
+                var (label, css) = r.Mine && r.Status == TicketStatus.Waiting ? ("You", "pill-solid") : Fmt.Status(r.Status);
+                <li class="@(r.Mine ? "me" : "")">
+                    <span class="n">@r.Position</span>
+                    <span class="mono grow" style="font-weight:700">@r.Number</span>
+                    <span class="pill @css">@label</span>
+                    <span class="xs muted nowrap">@r.Time.ToString("h:mm tt")</span>
+                </li>
+            }
+        </ul>
+        <p class="hint center">Numbers only. Names are never shown to other students.</p>
+    }
+</div>

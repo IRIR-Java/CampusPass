@@ -1,0 +1,100 @@
+@model AdminDashboard
+@inject IClock Clock
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Nav"] = "dashboard";
+    var now = Clock.Now;
+    var bars = Model.RequestsToday;
+    var max = Math.Max(4, bars.Select(b => b.Count).DefaultIfEmpty(0).Max());
+    var step = (int)Math.Ceiling(max / 4.0);
+    var top = step * 4;
+    const int W = 560, H = 220, L = 34, B = 34, T = 14;
+    var plotW = W - L - 8;
+    var plotH = H - B - T;
+    var slot = bars.Count == 0 ? 0 : plotW / (double)bars.Count;
+    var barW = Math.Min(44, slot * 0.55);
+    var ring = 2 * Math.PI * 54;
+}
+<div data-refresh="60"></div>
+<div class="page-head">
+    <div><h1>Admin Dashboard</h1><p>@now.ToString("dddd d MMMM yyyy") · the whole campus at a glance.</p></div>
+</div>
+
+<div class="kpis">
+    <div class="kpi"><span class="tile-ic t-green"><partial name="_Icon" model="@("users")" /></span><div><div class="n">@Model.Students.ToString("N0")</div><div class="l">Total Students</div></div></div>
+    <div class="kpi"><span class="tile-ic t-blue"><partial name="_Icon" model="@("layers")" /></span><div><div class="n">@Model.Departments</div><div class="l">Departments</div></div></div>
+    <div class="kpi"><span class="tile-ic t-purple"><partial name="_Icon" model="@("user")" /></span><div><div class="n">@Model.StaffOnDuty<span class="muted" style="font-size:1rem">/@Model.Staff</span></div><div class="l">Staff on duty</div></div></div>
+    <div class="kpi"><span class="tile-ic t-amber"><partial name="_Icon" model="@("qr")" /></span><div><div class="n">@Model.PassesIssued.ToString("N0")</div><div class="l">Gatepasses issued · @Model.Cleared.ToString("N0") cleared</div></div></div>
+</div>
+
+<div class="split3">
+    <section class="card">
+        <div class="card-title">Service Requests (Today)</div>
+        @if (bars.All(b => b.Count == 0))
+        {
+            <div class="empty"><partial name="_Icon" model="@("chart")" />No requests yet today.</div>
+        }
+        else
+        {
+            <svg class="chart" viewBox="0 0 @W @H" role="img" aria-label="Service requests today by department">
+                @for (var g = 0; g <= 4; g++)
+                {
+                    var y = T + plotH - plotH * g / 4.0;
+                    <g>
+                        <line class="grid" x1="@L" x2="@(W - 8)" y1="@y.ToString("0.#")" y2="@y.ToString("0.#")" />
+                        <text class="lbl" x="@(L - 6)" y="@((y + 4).ToString("0.#"))" text-anchor="end">@(step * g)</text>
+                    </g>
+                }
+                @for (var i = 0; i < bars.Count; i++)
+                {
+                    var b = bars[i];
+                    var h = plotH * b.Count / (double)top;
+                    var x = L + slot * i + (slot - barW) / 2;
+                    var y = T + plotH - h;
+                    var r = Math.Min(4, h / 2);
+                    <g>
+                        <title>@b.Department.Name: @b.Count request@(b.Count == 1 ? "" : "s")</title>
+                        @if (h > 0)
+                        {
+                            <path class="bar" d="M@(x.ToString("0.#")) @((T + plotH).ToString("0.#")) V@((y + r).ToString("0.#")) Q@(x.ToString("0.#")) @(y.ToString("0.#")) @((x + r).ToString("0.#")) @(y.ToString("0.#")) H@((x + barW - r).ToString("0.#")) Q@((x + barW).ToString("0.#")) @(y.ToString("0.#")) @((x + barW).ToString("0.#")) @((y + r).ToString("0.#")) V@((T + plotH).ToString("0.#")) Z" />
+                        }
+                        <rect x="@((L + slot * i).ToString("0.#"))" y="@T" width="@slot.ToString("0.#")" height="@plotH" fill="transparent" />
+                        <text class="val" x="@((x + barW / 2).ToString("0.#"))" y="@((y - 5).ToString("0.#"))" text-anchor="middle">@b.Count</text>
+                        <text class="lbl" x="@((x + barW / 2).ToString("0.#"))" y="@(H - 14)" text-anchor="middle">@b.Department.Code</text>
+                    </g>
+                }
+            </svg>
+            <p class="hint mb-0">@string.Join(" · ", bars.Select(b => $"{b.Department.Code} = {b.Department.Name}"))</p>
+        }
+    </section>
+
+    <section class="card">
+        <div class="row between mb-1"><div class="card-title mb-0">Recent Activity</div><a class="small" href="/Admin/Reports">Reports</a></div>
+        @if (!Model.Recent.Any()) { <div class="empty"><partial name="_Icon" model="@("ticket")" />Nothing yet.</div> }
+        <ul class="activity">
+            @foreach (var t in Model.Recent)
+            {
+                var (label, css) = Fmt.Status(t.Status);
+                <li><span class="tile-ic t-@t.Department!.Color" style="width:30px;height:30px;flex-basis:30px;border-radius:8px"><partial name="_Icon" model="@t.Department.Icon" /></span><span class="mono grow" style="font-weight:700">@t.Number</span><span class="pill @css">@label</span><span class="xs muted nowrap">@t.UpdatedAt.ToString("h:mm tt")</span></li>
+            }
+        </ul>
+    </section>
+
+    <section class="card center">
+        <div class="card-title" style="text-align:left">Queue Health</div>
+        <div class="ring-wrap">
+            <svg viewBox="0 0 140 140" role="img" aria-label="@Model.OnTrackPercent percent of students served within their batch">
+                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--g100)" stroke-width="14" />
+                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--g600)" stroke-width="14" stroke-linecap="round"
+                        stroke-dasharray="@((ring * Model.OnTrackPercent / 100).ToString("0.#")) @ring.ToString("0.#")" transform="rotate(-90 70 70)" />
+            </svg>
+            <div class="v"><div><b>@Model.OnTrackPercent%</b><span class="xs muted">@(Model.OnTrackPercent >= 80 ? "On Track" : "Behind")</span></div></div>
+        </div>
+        <p class="small muted mb-0">Served within their batch today</p>
+        <div class="divider"></div>
+        <div class="row between small"><span class="muted">Average wait</span><b>@(Model.AvgWaitMinutes is double w ? $"~ {w:0} min" : "–")</b></div>
+        <div class="row between small mt-1"><span class="muted">Waiting now</span><b>@Model.WaitingNow</b></div>
+        <div class="row between small mt-1"><span class="muted">Served today</span><b>@Model.ServedToday</b></div>
+    </section>
+</div>

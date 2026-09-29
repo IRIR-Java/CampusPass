@@ -1,0 +1,52 @@
+@model IReadOnlyList<Department>
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Services";
+    ViewData["Nav"] = "services";
+    var edit = ViewData["Edit"] as Department;
+    var counts = (Dictionary<int, int>)ViewData["StaffCounts"]!;
+    var f = edit ?? new Department { AvgServiceMinutes = 5, Icon = "dots", Color = "green", SortOrder = Model.Count + 1, IsActive = true };
+    var icons = new[] { "laptop", "wallet", "shield", "book", "doc", "dots", "users", "building", "help", "calendar" };
+    var colors = new[] { "blue", "green", "amber", "red", "purple", "teal", "grey" };
+}
+<div class="page-head"><div><h1>Services</h1><p>The offices students can queue for. The code prefixes ticket numbers, and the average time sets batch sizes.</p></div></div>
+<div class="split">
+    <section class="card">
+        <div class="table-wrap"><table class="table">
+            <thead><tr><th>Service</th><th>Code</th><th>Location</th><th>Avg min</th><th>Staff</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var d in Model)
+            {
+                <tr class="@(edit?.Id == d.Id ? "hl" : "")">
+                    <td><div class="row" style="gap:.6rem"><span class="tile-ic t-@d.Color" style="width:34px;height:34px;flex-basis:34px;border-radius:9px"><partial name="_Icon" model="@d.Icon" /></span><div><b>@d.Name</b><div class="xs muted">@d.Description</div></div></div></td>
+                    <td class="mono">@d.Code</td>
+                    <td class="small">@d.Location</td>
+                    <td>@d.AvgServiceMinutes</td>
+                    <td>@counts.GetValueOrDefault(d.Id)</td>
+                    <td><span class="pill @(d.IsActive ? "pill-green" : "pill-grey")">@(d.IsActive ? "Active" : "Hidden")</span></td>
+                    <td class="right"><a class="btn btn-light btn-sm" href="?edit=@d.Id"><partial name="_Icon" model="@("edit")" />Edit</a></td>
+                </tr>
+            }
+            </tbody>
+        </table></div>
+    </section>
+    <form class="card" method="post" asp-action="SaveService">
+        <div class="card-title">@(edit is null ? "Add a service" : $"Edit {edit.Name}")</div>
+        @if (edit is not null) { <input type="hidden" name="id" value="@edit.Id" /> }
+        <div class="field"><label for="name">Name</label><input class="input" id="name" name="name" value="@f.Name" required maxlength="60" /></div>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr">
+            <div class="field"><label for="code">Code</label><input class="input mono" id="code" name="code" value="@f.Code" required maxlength="6" /></div>
+            <div class="field"><label for="avgMinutes">Avg minutes</label><input class="input" type="number" id="avgMinutes" name="avgMinutes" value="@f.AvgServiceMinutes" min="1" max="120" required /></div>
+        </div>
+        <div class="field"><label for="description">Short description</label><input class="input" id="description" name="description" value="@f.Description" maxlength="120" placeholder="Fees, receipts, payments" /></div>
+        <div class="field"><label for="location">Where students go</label><input class="input" id="location" name="location" value="@f.Location" maxlength="120" placeholder="Finance Office, Main Administration Block" /></div>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="field"><label for="icon">Icon</label><select class="select" id="icon" name="icon">@foreach (var i in icons) { <option selected="@(f.Icon == i)">@i</option> }</select></div>
+            <div class="field"><label for="color">Colour</label><select class="select" id="color" name="color">@foreach (var c in colors) { <option selected="@(f.Color == c)">@c</option> }</select></div>
+            <div class="field"><label for="sortOrder">Order</label><input class="input" type="number" id="sortOrder" name="sortOrder" value="@f.SortOrder" /></div>
+        </div>
+        <label class="check mb-2"><input type="checkbox" name="isActive" value="true" checked="@f.IsActive" /> Students can request it</label>
+        <input type="hidden" name="isActive" value="false" />
+        <div class="row"><button class="btn btn-primary">Save</button>@if (edit is not null) { <a class="btn btn-light" href="/Admin/Services">Cancel</a> }</div>
+    </form>
+</div>

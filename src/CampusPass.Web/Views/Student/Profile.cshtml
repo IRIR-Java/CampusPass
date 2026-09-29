@@ -1,0 +1,46 @@
+@model ProfilePage
+@{
+    Layout = "_Student";
+    ViewData["Title"] = "Profile";
+    ViewData["Tab"] = "profile";
+    var u = Model.User;
+    var r = Model.Record;
+}
+<partial name="_Bar" model="@(("Profile", (string?)null))" />
+<div class="screen" style="padding-top:.2rem">
+    <partial name="_Flash" />
+    <div class="profile-head">
+        <span class="avatar">@Auth.Initials(u.DisplayName)</span>
+        <div class="grow">
+            <div style="font-weight:800;font-size:1.1rem">@u.DisplayName</div>
+            <div class="small" style="opacity:.9">Student · <span class="mono">@u.Username</span>@(Model.Active is Ticket t ? $" · {t.Number}" : "")</div>
+        </div>
+    </div>
+
+    @if (r is not null)
+    {
+        <div class="card mt-2" style="box-shadow:none;border:1px solid var(--line)">
+            <dl class="dl" style="grid-template-columns:110px 1fr">
+                <dt>Faculty</dt><dd>@r.Faculty</dd>
+                <dt>Phone</dt><dd>@r.Phone</dd>
+                <dt>Fees</dt><dd>@(r.IsCleared ? "Cleared" : $"Balance {Fmt.Money(r.Balance)}")</dd>
+                <dt>Updated</dt><dd>@r.BalanceAsOf.ToString("d MMM yyyy, HH:mm")</dd>
+            </dl>
+        </div>
+    }
+
+    <nav class="menu">
+        <a href="/Student/Queue"><partial name="_Icon" model="@("ticket")" />My Tickets<span class="chev"><partial name="_Icon" model="@("chev")" /></span></a>
+        <a href="/Student/Gatepass"><partial name="_Icon" model="@("qr")" />My Gatepass<span class="chev"><partial name="_Icon" model="@("chev")" /></span></a>
+        <a href="/Notifications"><partial name="_Icon" model="@("bell")" />Notifications<span class="chev"><partial name="_Icon" model="@("chev")" /></span></a>
+        <a href="/Account/ChangePassword"><partial name="_Icon" model="@("key")" />Change Password<span class="chev"><partial name="_Icon" model="@("chev")" /></span></a>
+        <a href="/Student/Help"><partial name="_Icon" model="@("help")" />Help &amp; Support<span class="chev"><partial name="_Icon" model="@("chev")" /></span></a>
+        <form method="post" action="/Account/Logout" asp-antiforgery="true"><button class="danger"><partial name="_Icon" model="@("logout")" />Log Out</button></form>
+    </nav>
+
+    <div class="skyline">
+        <partial name="_Campus" />
+        <b>@Model.Settings.InstitutionName</b>
+        <span>CampusPass · @Model.Settings.Semester</span>
+    </div>
+</div>

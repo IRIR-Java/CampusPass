@@ -1,0 +1,7 @@
+bin/
+obj/
+.vs/
+*.user
+publish/
+# runtime data: database, cookie keys (never commit)
+**/App_Data/

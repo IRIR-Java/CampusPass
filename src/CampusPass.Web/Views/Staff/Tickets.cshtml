@@ -1,0 +1,50 @@
+@model IReadOnlyList<Ticket>
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Tickets";
+    ViewData["Nav"] = "tickets";
+    var status = ViewData["Status"] as string ?? "all";
+    var days = (int)ViewData["Days"]!;
+}
+<div class="page-head"><div><h1>Tickets</h1><p>Every ticket at your department, newest first.</p></div></div>
+<form class="filters" method="get">
+    <div class="search" style="min-width:260px"><partial name="_Icon" model="@("search")" /><input class="input" name="q" value="@ViewData["Q"]" placeholder="Ticket, reg no or name" /></div>
+    <select class="select" name="status" aria-label="Status">
+        @foreach (var (v, l) in new[] { ("all", "All statuses"), ("Waiting", "Waiting"), ("Called", "Called"), ("Serving", "In service"), ("Completed", "Served"), ("NoShow", "Missed"), ("Cancelled", "Cancelled") })
+        {
+            <option value="@v" selected="@(status == v)">@l</option>
+        }
+    </select>
+    <select class="select" name="days" aria-label="Period">
+        @foreach (var dd in new[] { 1, 7, 30, 90 }) { <option value="@dd" selected="@(days == dd)">@(dd == 1 ? "Today" : $"Last {dd} days")</option> }
+    </select>
+    <button class="btn btn-primary">Filter</button>
+</form>
+<section class="card">
+    @if (!Model.Any())
+    {
+        <div class="empty"><partial name="_Icon" model="@("ticket")" />No tickets match.</div>
+    }
+    else
+    {
+        <div class="table-wrap"><table class="table">
+            <thead><tr><th>Ticket</th><th>Student</th><th>Reg No</th><th>Batch</th><th>Mode</th><th>Status</th><th>Handled by</th><th>Outcome</th></tr></thead>
+            <tbody>
+            @foreach (var t in Model)
+            {
+                var (label, css) = Fmt.Status(t.Status);
+                <tr>
+                    <td class="mono" style="font-weight:700">@t.Number</td>
+                    <td>@t.StudentName</td>
+                    <td class="mono small"><a href="/Staff/Students?reg=@Uri.EscapeDataString(t.RegNo)">@t.RegNo</a></td>
+                    <td class="nowrap small">@t.WindowStart.ToString("ddd d MMM, h:mm tt")</td>
+                    <td class="small">@(t.Mode == TicketMode.Appointment ? "Appointment" : "Queue")</td>
+                    <td><span class="pill @css">@label</span></td>
+                    <td class="small">@(t.StaffName ?? "–")</td>
+                    <td class="small muted" style="max-width:260px">@(t.Resolution ?? t.Description ?? "")</td>
+                </tr>
+            }
+            </tbody>
+        </table></div>
+    }
+</section>

@@ -1,0 +1,11 @@
+@model (string Title, string? Back)
+@inject NotificationService Notify
+@{ var unread = await Notify.UnreadAsync(User.UserId()); }
+<header class="bar">
+    @if (Model.Back is not null)
+    {
+        <a class="icon-btn" href="@Model.Back" aria-label="Back"><partial name="_Icon" model="@("back")" /></a>
+    }
+    <h1>@Model.Title</h1>
+    <a class="icon-btn" href="/Notifications" aria-label="Notifications (@unread unread)"><partial name="_Icon" model="@("bell")" />@if (unread > 0) { <span class="badge">@unread</span> }</a>
+</header>

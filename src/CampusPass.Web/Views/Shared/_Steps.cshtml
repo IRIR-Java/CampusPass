@@ -1,0 +1,11 @@
+@model int
+@{
+    string Cls(int n) => n < Model ? "done" : n == Model ? "on" : "";
+}
+<div class="stepper" aria-label="Step @Model of 3">
+    <div class="@Cls(1)"><span class="dot">@(Model > 1 ? "✓" : "1")</span>Select Service</div>
+    <span class="line"></span>
+    <div class="@Cls(2)"><span class="dot">@(Model > 2 ? "✓" : "2")</span>Choose Mode</div>
+    <span class="line"></span>
+    <div class="@Cls(3)"><span class="dot">3</span>Confirm</div>
+</div>

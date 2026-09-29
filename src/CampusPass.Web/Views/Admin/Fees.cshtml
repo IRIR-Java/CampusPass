@@ -1,0 +1,36 @@
+@model ImportResult?
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Fee records";
+    ViewData["Nav"] = "fees";
+    var count = (int)ViewData["Count"]!;
+    var newest = ViewData["Newest"] as DateTime?;
+}
+<div class="page-head"><div><h1>Fee records</h1><p>Upload Finance's balances. Students see them at once. Newly cleared students are told their gatepass is ready, and anyone who now owes loses their gatepass at the gate.</p></div></div>
+<div class="split-even">
+    <form class="card" method="post" enctype="multipart/form-data" asp-action="Fees">
+        <div class="card-title">Upload a CSV</div>
+        <div class="field"><label for="file">File from Finance</label><input class="input" type="file" id="file" name="file" accept=".csv,text/csv" required /></div>
+        <p class="small muted">Columns, in this order: <span class="mono">@FeeImportService.Header</span>. Existing students are updated and new ones added.</p>
+        <div class="row"><button class="btn btn-primary"><partial name="_Icon" model="@("upload")" />Upload</button><a class="btn btn-light" href="/Admin/FeeTemplate"><partial name="_Icon" model="@("download")" />Template</a></div>
+    </form>
+    <section class="card">
+        <div class="card-title">Current data</div>
+        <div style="font-size:2rem;font-weight:800">@count.ToString("N0")</div>
+        <p class="muted">student fee records@(newest is DateTime n ? $" · last upload {n:d MMM yyyy, HH:mm}" : "")</p>
+        @if (Model is not null)
+        {
+            <div class="divider"></div>
+            <div class="card-title">Upload result</div>
+            <dl class="dl"><dt>Rows read</dt><dd>@Model.Rows</dd><dt>Added</dt><dd>@Model.Added</dd><dt>Updated</dt><dd>@Model.Updated</dd><dt>Newly cleared</dt><dd>@Model.NowCleared</dd><dt>Passes paused</dt><dd>@Model.PassesRevoked</dd></dl>
+            @if (Model.Errors.Any())
+            {
+                <div class="note note-amber mt-1"><partial name="_Icon" model="@("alert")" /><div><b>@Model.Errors.Count row(s) skipped.</b> The rest loaded.<ul style="margin:.3rem 0 0;padding-left:1.1rem">@foreach (var e in Model.Errors) { <li>@e</li> }</ul></div></div>
+            }
+            else
+            {
+                <div class="note note-green mt-1"><partial name="_Icon" model="@("check")" /><div>All rows loaded.</div></div>
+            }
+        }
+    </section>
+</div>

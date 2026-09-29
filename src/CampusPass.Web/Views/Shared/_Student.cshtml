@@ -1,0 +1,13 @@
+@{
+    Layout = "_Layout";
+    ViewData["BodyClass"] = "student";
+    var tab = ViewData["Tab"] as string ?? "home";
+}
+<div class="app">
+    @RenderBody()
+</div>
+<nav class="tabbar" aria-label="Main">
+    <a class="@(tab == "home" ? "on" : "")" href="/Student"><partial name="_Icon" model="@("home")" />Home</a>
+    <a class="@(tab == "tickets" ? "on" : "")" href="/Student/Queue"><partial name="_Icon" model="@("ticket")" />My Tickets</a>
+    <a class="@(tab == "profile" ? "on" : "")" href="/Student/Profile"><partial name="_Icon" model="@("user")" />Profile</a>
+</nav>

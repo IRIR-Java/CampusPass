@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "Welcome";
+    var inst = ViewData["Institution"] as string;
+}
+<div class="landing">
+    <section class="features" aria-label="About CampusPass">
+        <div class="brand-row">
+            <span class="brand-mark"><partial name="_Icon" model="@("ticket")" /></span>
+            <div><div class="brand-inst">@inst</div><div class="brand-name">Campus<em>Pass</em></div></div>
+        </div>
+        <p class="mt-2" style="font-size:1.15rem;color:var(--g800);font-weight:600">Join the queue remotely, wait less, get things done.</p>
+        <div class="feat-list">
+            <div class="feat"><span class="tile-ic t-green"><partial name="_Icon" model="@("digital")" /></span><div><b>Digital Queue</b><span>No more long physical lines.</span></div></div>
+            <div class="feat"><span class="tile-ic t-green"><partial name="_Icon" model="@("calendar")" /></span><div><b>Smart Batching</b><span>Get a time window, not just a number.</span></div></div>
+            <div class="feat"><span class="tile-ic t-green"><partial name="_Icon" model="@("shield")" /></span><div><b>Organized Services</b><span>Right service. Right department.</span></div></div>
+            <div class="feat"><span class="tile-ic t-green"><partial name="_Icon" model="@("users")" /></span><div><b>Better Experience</b><span>For students, staff and the university.</span></div></div>
+        </div>
+        <div class="note note-green mt-3"><partial name="_Icon" model="@("bulb")" /><div><b>Cleared students skip the line entirely.</b> Your QR gatepass is waiting in the app, and Security checks it with any phone.</div></div>
+    </section>
+
+    <section class="phone-hero">
+        <div class="top">
+            <span class="brand-mark" style="margin:0 auto;width:64px;height:64px;border-radius:18px"><partial name="_Icon" model="@("ticket")" /></span>
+            <div class="inst">@inst</div>
+            <h1>Campus<em>Pass</em></h1>
+            <p class="tag">Join the queue remotely, wait less, get things done.</p>
+        </div>
+        <div class="illus"><partial name="_Campus" /></div>
+        <div class="cta">
+            <a class="btn btn-white btn-lg btn-block" href="/Account/Login?first=true">Get Started <partial name="_Icon" model="@("arrow")" /></a>
+            <a class="btn btn-ghost-white btn-lg btn-block" href="/Account/Login">I already have an account</a>
+            <div class="foot">@inst</div>
+        </div>
+    </section>
+</div>

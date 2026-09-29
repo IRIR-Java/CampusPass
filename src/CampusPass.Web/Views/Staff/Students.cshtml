@@ -1,0 +1,64 @@
+@model StudentLookupPage
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Students";
+    ViewData["Nav"] = "students";
+    var c = Model.Selected;
+}
+<div class="page-head"><div><h1>Student Lookup</h1><p>Fee position, gatepass and tickets in one place. No need to ask "what is your balance?".</p></div></div>
+<form class="filters" method="get">
+    <div class="search" style="min-width:320px"><partial name="_Icon" model="@("search")" /><input class="input" name="q" value="@Model.Q" placeholder="Reg no or name" autofocus /></div>
+    <button class="btn btn-primary">Search</button>
+</form>
+
+<div class="split">
+    <div>
+        @if (c is not null)
+        {
+            <section class="card">
+                <div class="row">
+                    <span class="avatar">@Auth.Initials(c.Record.Name)</span>
+                    <div class="grow"><div style="font-weight:800;font-size:1.1rem">@c.Record.Name</div><div class="mono small muted">@c.Record.RegNo · @c.Record.Faculty</div></div>
+                    <span class="pill @(Model.HasLogin ? "pill-green" : "pill-grey")">@(Model.HasLogin ? "Has CampusPass login" : "No login yet")</span>
+                </div>
+                <div class="fee @(c.Cleared ? "fee-ok" : "fee-owe")">
+                    @if (c.Cleared) { <b>Fees cleared</b> } else { <b>Owes @Fmt.Money(c.Record.Balance)</b> }
+                    · paid @Fmt.Money(c.Record.Paid) of @Fmt.Money(c.Record.TotalFee) · updated @c.Record.BalanceAsOf.ToString("d MMM, HH:mm")
+                </div>
+                <dl class="dl">
+                    <dt>Phone</dt><dd>@c.Record.Phone</dd>
+                    <dt>Gatepass</dt><dd>@(c.Pass is null ? (c.Cleared ? "Issued when the student opens the app" : "None (not cleared)") : $"{c.Pass.Serial} · valid to {c.Pass.ExpiresAt:d MMM yyyy}")</dd>
+                </dl>
+            </section>
+            <section class="card">
+                <div class="card-title">Tickets</div>
+                @if (!Model.Tickets.Any()) { <p class="muted mb-0">No tickets.</p> }
+                <ul class="activity">
+                    @foreach (var t in Model.Tickets)
+                    {
+                        var (label, css) = Fmt.Status(t.Status);
+                        <li><span class="mono" style="font-weight:700;min-width:74px">@t.Number</span><span class="grow">@t.Department!.Name · @t.WindowStart.ToString("d MMM, h:mm tt")</span><span class="pill @css">@label</span></li>
+                    }
+                </ul>
+            </section>
+        }
+        else if (Model.Matches.Any())
+        {
+            <section class="card">
+                <div class="card-title">@Model.Matches.Count match@(Model.Matches.Count == 1 ? "" : "es")</div>
+                @foreach (var m in Model.Matches)
+                {
+                    <a class="list-item" href="/Staff/Students?reg=@Uri.EscapeDataString(m.RegNo)"><span class="avatar" style="width:40px;height:40px;flex-basis:40px">@Auth.Initials(m.Name)</span><div class="grow"><b>@m.Name</b><span class="mono">@m.RegNo · @m.Faculty</span></div><span class="pill @(m.IsCleared ? "pill-green" : "pill-amber")">@(m.IsCleared ? "Cleared" : Fmt.Money(m.Balance))</span></a>
+                }
+            </section>
+        }
+        else
+        {
+            <section class="card"><div class="empty"><partial name="_Icon" model="@("users")" />@(Model.Q is null ? "Search by reg number or name." : "No student found.")</div></section>
+        }
+    </div>
+    <section class="card">
+        <div class="card-title">Why this helps</div>
+        <p class="small muted mb-0">Most students queue just to learn their balance. Here you see it at once, along with whether their gatepass is valid, so a 10-minute conversation becomes a 1-minute answer.</p>
+    </section>
+</div>

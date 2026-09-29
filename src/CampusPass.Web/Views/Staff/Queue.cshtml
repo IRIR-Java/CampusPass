@@ -1,0 +1,15 @@
+@model IReadOnlyList<Ticket>
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Queue";
+    ViewData["Nav"] = "queue";
+    var me = (UserAccount)ViewData["Me"]!;
+}
+<div data-refresh="20"></div>
+<div class="page-head">
+    <div><h1>Today's Queue</h1><p>@me.Department?.Name · in call order: earliest batch first, then first come, first served.</p></div>
+    <form method="post" action="/Staff/CallNext" asp-antiforgery="true"><button class="btn btn-primary"><partial name="_Icon" model="@("megaphone")" />Call Next Student</button></form>
+</div>
+<section class="card">
+    <partial name="_QueueTable" model="Model" />
+</section>

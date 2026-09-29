@@ -1,0 +1,31 @@
+@model IReadOnlyList<Notification>
+@{
+    ViewData["Title"] = "Notifications";
+    var role = (Role)ViewData["Role"]!;
+    var student = role == Role.Student;
+    Layout = student ? "_Student" : "_Console";
+    ViewData["Tab"] = "home";
+    string Icon(string k) => k switch { "called" => "megaphone", "almost" => "bell", "done" => "check", _ => "info" };
+    string Tint(string k) => k switch { "called" => "t-green", "almost" => "t-amber", "done" => "t-green", _ => "t-blue" };
+}
+@if (student)
+{
+    <partial name="_Bar" model="@(("Notifications", (string?)"/Student"))" />
+}
+<div class="@(student ? "screen" : "")" style="@(student ? "" : "max-width:720px")">
+    @if (!student)
+    {
+        <div class="page-head"><div><h1>Notifications</h1><p>Your latest updates.</p></div></div>
+    }
+    @if (!Model.Any())
+    {
+        <div class="empty"><partial name="_Icon" model="@("bell")" />No notifications yet.</div>
+    }
+    @foreach (var n in Model)
+    {
+        <a class="list-item" href="@(n.Link ?? "#")" style="@(n.Read ? "" : "border-color:var(--g200);background:var(--g50)")">
+            <span class="tile-ic @Tint(n.Kind)"><partial name="_Icon" model="@Icon(n.Kind)" /></span>
+            <div class="grow"><b>@n.Title</b><span>@n.Body</span><span class="xs">@n.CreatedAt.ToString("ddd d MMM, HH:mm")</span></div>
+        </a>
+    }
+</div>

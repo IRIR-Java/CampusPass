@@ -1,0 +1,7 @@
+.git/
+**/bin/
+**/obj/
+**/App_Data/
+publish/
+docs/
+tests/

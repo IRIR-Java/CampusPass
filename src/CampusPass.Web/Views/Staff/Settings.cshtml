@@ -1,0 +1,22 @@
+@model UserAccount
+@{
+    Layout = "_Console";
+    ViewData["Title"] = "Settings";
+    ViewData["Nav"] = "settings";
+}
+<div class="page-head"><div><h1>Settings</h1><p>Your duty status and counter.</p></div></div>
+<div class="split-even">
+    <form class="card" method="post" asp-action="Settings">
+        <div class="card-title">Duty</div>
+        <label class="check mb-2"><input type="checkbox" name="onDuty" value="true" checked="@Model.OnDuty" /> I'm on duty today</label>
+        <input type="hidden" name="onDuty" value="false" />
+        <p class="small muted">Batch sizes are based on how many staff are on duty, so turn this off when you're away. Students already booked keep their place.</p>
+        <div class="field"><label for="counter">My counter or desk</label><input class="input" id="counter" name="counter" value="@Model.Counter" maxlength="30" placeholder="e.g. Counter 2" /><div class="hint">Shown to students when you call them.</div></div>
+        <button class="btn btn-primary">Save</button>
+    </form>
+    <section class="card">
+        <div class="card-title">Account</div>
+        <dl class="dl"><dt>Name</dt><dd>@Model.DisplayName</dd><dt>Username</dt><dd class="mono">@Model.Username</dd><dt>Department</dt><dd>@Model.Department?.Name</dd></dl>
+        <a class="btn btn-light mt-2" href="/Account/ChangePassword"><partial name="_Icon" model="@("key")" />Change password</a>
+    </section>
+</div>
