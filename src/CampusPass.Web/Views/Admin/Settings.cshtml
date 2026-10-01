@@ -1,4 +1,5 @@
 @model SystemSettings
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
 @{
     Layout = "_Console";
     ViewData["Title"] = "Settings";
@@ -27,3 +28,14 @@
         <a class="btn btn-light mt-2" href="/Account/ChangePassword"><partial name="_Icon" model="@("key")" />Change my password</a>
     </section>
 </div>
+
+@if (Config.GetValue<bool>("Demo"))
+{
+    <section class="card mt-3">
+        <div class="card-title"><partial name="_Icon" model="@("layers")" /> Demonstration data</div>
+        <p class="small muted mb-2">Reloads a fresh demonstration scenario — twelve students each with a different issue, a service officer per department, and a live queue. <b>This replaces all current tickets, fee records and accounts.</b> Login details are shared separately with your group, not shown in the app.</p>
+        <form method="post" asp-action="LoadDemo" data-confirm="Replace everything with a fresh demonstration scenario?">
+            <button class="btn btn-primary"><partial name="_Icon" model="@("layers")" />Reload demonstration data</button>
+        </form>
+    </section>
+}

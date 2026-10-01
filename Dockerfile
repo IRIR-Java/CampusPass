@@ -10,9 +10,9 @@ WORKDIR /app
 COPY --from=build /app .
 RUN mkdir -p /app/App_Data && chown app /app/App_Data
 # Cloud hosts put a proxy in front of the app: trust its X-Forwarded-* headers (real client IP + https).
-ENV ASPNETCORE_URLS=http://+:8080 \
-    ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+ENV ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
 EXPOSE 8080
 VOLUME /app/App_Data
 USER app
-ENTRYPOINT ["dotnet", "CampusPass.Web.dll"]
+# Bind to the port the host gives us ($PORT on Render/Railway/etc.), or 8080 locally.
+ENTRYPOINT ["/bin/sh", "-c", "ASPNETCORE_URLS=http://+:${PORT:-8080} dotnet CampusPass.Web.dll"]

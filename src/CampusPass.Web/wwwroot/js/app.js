@@ -77,6 +77,29 @@
     }, secs * 1000);
   }
 
+  // Show / hide password.
+  $$('.pw-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var wrap = btn.closest('.pw');
+      var input = wrap && wrap.querySelector('input');
+      if (!input) return;
+      var reveal = input.type === 'password';
+      input.type = reveal ? 'text' : 'password';
+      wrap.classList.toggle('show', reveal);
+      btn.setAttribute('aria-pressed', reveal ? 'true' : 'false');
+      btn.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+    });
+  });
+
+  // Spinner on the button that submitted a form (unless the submit was cancelled, e.g. a declined confirm).
+  $$('form').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      if (e.defaultPrevented) return;
+      var btn = e.submitter || f.querySelector('button[type=submit], button:not([type])');
+      if (btn && btn.classList.contains('btn') && !btn.disabled) btn.classList.add('is-loading');
+    });
+  });
+
   // "It's your turn": vibrate once per ticket.
   var buzz = $('[data-buzz]');
   var id = buzz && buzz.getAttribute('data-buzz');
@@ -84,5 +107,29 @@
     try {
       if (!sessionStorage.getItem('cp_buzz_' + id)) { navigator.vibrate([300, 150, 300]); sessionStorage.setItem('cp_buzz_' + id, '1'); }
     } catch (e) { navigator.vibrate(300); }
+  }
+
+  // Top loading bar: the page gives instant feedback while the next one loads.
+  var bar = document.getElementById('loadbar');
+  if (bar) {
+    var fill = bar.firstElementChild, timer;
+    var start = function (e) {
+      if (e && e.defaultPrevented) return;
+      clearInterval(timer);
+      bar.classList.add('on');
+      var w = 8; fill.style.width = w + '%';
+      timer = setInterval(function () { w = Math.min(92, w + (92 - w) * 0.16); fill.style.width = w + '%'; }, 180);
+    };
+    var stop = function () { clearInterval(timer); bar.classList.remove('on'); fill.style.width = '0'; };
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a || e.defaultPrevented) return;
+      var href = a.getAttribute('href') || '';
+      if (!href || href.charAt(0) === '#' || a.target === '_blank' || a.hasAttribute('download') || /^(mailto:|tel:)/i.test(href)) return;
+      if (a.origin && a.origin !== location.origin) return;
+      start();
+    });
+    document.addEventListener('submit', start);
+    window.addEventListener('pageshow', function (e) { if (e.persisted) stop(); });
   }
 })();

@@ -33,7 +33,7 @@ public class SetupService(IAppDb db, IClock clock)
                 Semester = string.IsNullOrWhiteSpace(semester) ? "Current semester" : semester.Trim(),
                 PassValidUntil = passValidUntil,
                 PaymentInstructions = "Pay at any bank into the university fee account. Use your registration number as the reference.",
-                SupportContact = "ICT Centre, Main Administration Block · Mon–Fri 8:00–17:00",
+                SupportContact = "In-app: use the service that fits your issue. In person: the ICT Centre help desk, Mon–Fri 8:00–17:00.",
                 GatepassKey = Convert.ToHexString(RandomNumberGenerator.GetBytes(32))
             });
 
@@ -52,11 +52,11 @@ public class SetupService(IAppDb db, IClock clock)
     /// <summary>The service points found at most universities. Editable in Admin → Services.</summary>
     public static IEnumerable<Department> DefaultDepartments() => new[]
     {
-        new Department { Code = "ICT", Name = "ICT & Portal", Description = "Portal issues, system access, IT support", Location = "ICT Centre", AvgServiceMinutes = 8, Icon = "laptop", Color = "blue", SortOrder = 1 },
-        new Department { Code = "FIN", Name = "Finance", Description = "Fees, receipts, payments", Location = "Finance Office, Main Administration Block", AvgServiceMinutes = 5, Icon = "wallet", Color = "green", SortOrder = 2 },
-        new Department { Code = "GP", Name = "GatePass / Security", Description = "Gate pass, access, security", Location = "Security Office, Main Gate", AvgServiceMinutes = 3, Icon = "shield", Color = "amber", SortOrder = 3 },
-        new Department { Code = "ACA", Name = "Academic", Description = "Results, transcripts, exam cards", Location = "Academic Registrar's Office", AvgServiceMinutes = 6, Icon = "book", Color = "red", SortOrder = 4 },
-        new Department { Code = "ADM", Name = "Administration", Description = "Documents, letters, certificates", Location = "Main Administration Block", AvgServiceMinutes = 6, Icon = "doc", Color = "teal", SortOrder = 5 },
-        new Department { Code = "GEN", Name = "Other", Description = "General inquiries", Location = "Help Desk, Main Administration Block", AvgServiceMinutes = 5, Icon = "dots", Color = "grey", SortOrder = 6 },
+        new Department { Code = "ICT", Name = "ICT & Portal", Description = "Portal issues, system access, IT support", Location = "ICT Centre, Ground Floor", AvgServiceMinutes = 8, Icon = "laptop", Color = "blue", SortOrder = 1 },
+        new Department { Code = "FIN", Name = "Finance", Description = "Fees, receipts, payments", Location = "Finance Office, Administration Block", AvgServiceMinutes = 5, Icon = "wallet", Color = "green", SortOrder = 2 },
+        new Department { Code = "GP", Name = "GatePass / Security", Description = "Gate pass, access, security", Location = "Main Gate", AvgServiceMinutes = 3, Icon = "shield", Color = "amber", SortOrder = 3 },
+        new Department { Code = "ACA", Name = "Academic", Description = "Results, transcripts, exam cards", Location = "Registrar's Office, Academic Block", AvgServiceMinutes = 6, Icon = "book", Color = "red", SortOrder = 4 },
+        new Department { Code = "ADM", Name = "Administration", Description = "Documents, letters, certificates", Location = "Records Office, Administration Block", AvgServiceMinutes = 6, Icon = "doc", Color = "teal", SortOrder = 5 },
+        new Department { Code = "GEN", Name = "Other", Description = "General inquiries", Location = "Student Help Desk, Library Concourse", AvgServiceMinutes = 5, Icon = "dots", Color = "grey", SortOrder = 6 },
     };
 }

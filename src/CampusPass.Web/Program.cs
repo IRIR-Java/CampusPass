@@ -31,6 +31,7 @@ builder.Services.AddScoped<QueueService>();
 builder.Services.AddScoped<ClearanceService>();
 builder.Services.AddScoped<FeeImportService>();
 builder.Services.AddScoped<ReportService>();
+builder.Services.AddScoped<DemoService>();
 builder.Services.AddSingleton(new SetupCode(Convert.ToHexString(RandomNumberGenerator.GetBytes(6))));
 
 // ---------- Web ----------
@@ -71,7 +72,20 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
-    if (!await scope.ServiceProvider.GetRequiredService<SetupService>().IsCompleteAsync())
+    var setup = scope.ServiceProvider.GetRequiredService<SetupService>();
+
+    // Demo mode (set "Demo": true, or the Demo env var) gives a running, fully populated system with no manual setup —
+    // for showing the project. It never triggers unless deliberately switched on, so a shipped app carries no test data.
+    if (cfg.GetValue<bool>("Demo"))
+    {
+        var demo = scope.ServiceProvider.GetRequiredService<DemoService>();
+        if (!await demo.HasDataAsync())
+        {
+            await demo.LoadAsync();
+            app.Logger.LogWarning("CampusPass DEMO loaded. Password {Password}. Logins: admin; students EB1/0001/23 .. EB6/0006/23; staff 'STAFF 1' .. 'STAFF 5'.", DemoService.Password);
+        }
+    }
+    else if (!await setup.IsCompleteAsync())
         app.Logger.LogWarning("CampusPass is not set up yet. Open /Setup and enter this one-time setup code: {Code}", app.Services.GetRequiredService<SetupCode>().Value);
 }
 

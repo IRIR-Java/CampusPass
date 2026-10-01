@@ -4,7 +4,7 @@
 }
 <div class="auth">
     <div class="auth-box">
-        <a href="/" class="row" style="text-decoration:none"><span class="brand-mark" style="width:44px;height:44px;flex-basis:44px;border-radius:12px"><partial name="_Icon" model="@("ticket")" /></span><span class="brand-name" style="font-size:1.8rem">Campus<em>Pass</em></span></a>
+        <a href="/" class="row" style="text-decoration:none"><span class="brand-mark crest" style="width:46px;height:46px;flex-basis:46px;border-radius:12px"><img src="/img/crest.jpg" alt="Chuka University crest" /></span><span class="brand-name" style="font-size:1.8rem">Campus<em>Pass</em></span></a>
         <div class="auth-title">@(first ? "Let's get you started" : "Welcome back")</div>
         <p class="muted">@(first ? "Sign in with your reg number and the one-time password you received. You'll choose your own password next." : "Students: your reg number. Staff: your staff username.")</p>
         <partial name="_Flash" />
@@ -12,7 +12,7 @@
             <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
             @if (ViewData["Error"] is string err) { <div class="flash flash-error"><partial name="_Icon" model="@("alert")" /><span>@err</span></div> }
             <div class="field"><label for="username">Reg number or username</label><input class="input mono" id="username" name="username" value="@ViewData["Username"]" autocomplete="username" autocapitalize="characters" spellcheck="false" required autofocus placeholder="e.g. EB1/0001/23 or STAFF 1" /></div>
-            <div class="field"><label for="password">Password</label><input class="input" type="password" id="password" name="password" autocomplete="current-password" required /></div>
+            <div class="field"><label for="password">Password</label><div class="pw"><input class="input" type="password" id="password" name="password" autocomplete="current-password" required /><button type="button" class="pw-toggle" aria-label="Show password" aria-pressed="false"><span class="i-on"><partial name="_Icon" model="@("eye")" /></span><span class="i-off"><partial name="_Icon" model="@("eye-off")" /></span></button></div></div>
             <button class="btn btn-primary btn-lg btn-block">Sign in <partial name="_Icon" model="@("arrow")" /></button>
         </form>
         <p class="hint center mt-2">No password yet? Ask the ICT office or Finance for your one-time password.</p>

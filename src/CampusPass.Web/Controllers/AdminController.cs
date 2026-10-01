@@ -29,10 +29,19 @@ public class BatchesPage
 
 /// <summary>Queue manager / administrator: services, users, batches, fee data, reports and settings.</summary>
 [Authorize(Roles = nameof(Role.Admin))]
-public class AdminController(IAppDb db, AccountService accounts, FeeImportService fees, ReportService reports, IClock clock) : Controller
+public class AdminController(IAppDb db, AccountService accounts, FeeImportService fees, ReportService reports, DemoService demo, IClock clock) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index() => View(await reports.AdminAsync());
+
+    /// <summary>Replaces all activity with a fresh, fully populated demonstration day (for showing or testing the system).</summary>
+    [HttpPost]
+    public async Task<IActionResult> LoadDemo()
+    {
+        var s = await demo.LoadAsync();
+        TempData["Success"] = $"Demonstration data reloaded: {s.Students} students, {s.Staff} staff, {s.Tickets} tickets.";
+        return RedirectToAction(nameof(Settings));
+    }
 
     // ------------------------------------------------------------ services (departments)
 

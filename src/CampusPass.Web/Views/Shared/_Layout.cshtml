@@ -10,6 +10,7 @@
     @await RenderSectionAsync("Head", required: false)
 </head>
 <body class="@ViewData["BodyClass"]">
+    <div id="loadbar" aria-hidden="true"><span></span></div>
     @RenderBody()
     <script src="~/js/app.js" asp-append-version="true"></script>
 </body>

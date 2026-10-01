@@ -103,7 +103,7 @@ public class AccountController(AccountService accounts, IAppDb db) : Controller
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return Redirect("/");
+        return Redirect("/Account/Login");   // straight back to sign-in makes switching accounts one step
     }
 
     [HttpGet, Authorize]

@@ -1,42 +1,51 @@
 @{
     ViewData["Title"] = "Welcome";
     var inst = ViewData["Institution"] as string;
+    if (string.IsNullOrWhiteSpace(inst)) inst = "Chuka University";
 }
-@section Head { <link rel="preload" as="image" href="/img/campus-800.jpg" imagesrcset="/img/campus-800.jpg 800w, /img/campus-1600.jpg 1600w" imagesizes="(min-width: 980px) 58vw, 100vw" /> }
-<div class="welcome">
-    <div class="welcome-photo">
-        <img src="/img/campus-800.jpg" srcset="/img/campus-800.jpg 800w, /img/campus-1600.jpg 1600w" sizes="(min-width: 980px) 58vw, 100vw"
-             alt="Aerial view of the @inst main gate and campus buildings" />
-        <div class="welcome-top">
-            <span class="brand-mark"><partial name="_Icon" model="@("ticket")" /></span>
-            <b>@inst</b>
-        </div>
-        <div class="welcome-headline">
-            <h1>No more long lines at the gate, Finance or the Registrar.</h1>
-            <p>Check your fees, get your gatepass and join any office's queue from your phone.</p>
-            <div class="feat-glass">
-                <div><partial name="_Icon" model="@("digital")" /><b>Digital Queue</b><span>No more long physical lines.</span></div>
-                <div><partial name="_Icon" model="@("calendar")" /><b>Smart Batching</b><span>A time window, not just a number.</span></div>
-                <div><partial name="_Icon" model="@("shield")" /><b>Organized Services</b><span>Right service. Right office.</span></div>
-                <div><partial name="_Icon" model="@("qr")" /><b>QR Gatepass</b><span>Checked live at the gate.</span></div>
-            </div>
-        </div>
-    </div>
-
-    <section class="welcome-sheet">
+<div class="welcome2">
+    <div class="w2-inner">
+        <div class="crest-hero"><img src="/img/crest.jpg" alt="@inst crest" /></div>
+        <div class="w2-inst">@inst.ToUpperInvariant()</div>
         <div class="brand-name">Campus<em>Pass</em></div>
-        <p class="tag">Join the queue remotely, wait less, get things done.</p>
+        <p class="w2-tag">Join the queue remotely, wait less, get things done.</p>
 
-        <ul class="points">
-            <li><span class="tile-ic t-green"><partial name="_Icon" model="@("qr")" /></span><div><b>Fees cleared? Your gatepass is ready</b><span>No stamping, no queue. Show the QR at the gate.</span></div></li>
-            <li><span class="tile-ic t-blue"><partial name="_Icon" model="@("calendar")" /></span><div><b>Get a time window, not a line</b><span>Come when your batch is called.</span></div></li>
-            <li><span class="tile-ic t-amber"><partial name="_Icon" model="@("bell")" /></span><div><b>We tell you when it's your turn</b><span>Wait anywhere on campus.</span></div></li>
-        </ul>
+        <div class="w2-illus">
+            <svg class="w2-svg" viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Campus illustration">
+                <defs>
+                    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9f6ef" /><stop offset="1" stop-color="#ffffff" /></linearGradient>
+                </defs>
+                <rect width="320" height="190" rx="18" fill="url(#sky)" />
+                <circle cx="266" cy="38" r="15" fill="#cfeeda" />
+                <path d="M0 152 Q160 130 320 152 V190 H0 Z" fill="#d7efe0" />
+                <path d="M118 190 Q160 152 202 190 Z" fill="#c2e6cf" />
+                <!-- left trees -->
+                <rect x="34" y="120" width="6" height="26" rx="3" fill="#8a6a45" />
+                <circle cx="37" cy="112" r="16" fill="#1fa35c" /><circle cx="25" cy="121" r="11" fill="#138a4d" /><circle cx="50" cy="121" r="11" fill="#138a4d" />
+                <!-- right trees -->
+                <rect x="283" y="122" width="6" height="24" rx="3" fill="#8a6a45" />
+                <circle cx="286" cy="114" r="15" fill="#1fa35c" /><circle cx="297" cy="122" r="10" fill="#138a4d" />
+                <!-- building -->
+                <rect x="70" y="92" width="180" height="58" rx="4" fill="#ffffff" stroke="#e0e8e3" />
+                <rect x="128" y="66" width="64" height="84" rx="4" fill="#ffffff" stroke="#e0e8e3" />
+                <path d="M124 66 L160 44 L196 66 Z" fill="#138a4d" />
+                <path d="M66 92 L94 78 L122 92 Z" fill="#1fa35c" />
+                <path d="M198 92 L226 78 L254 92 Z" fill="#1fa35c" />
+                <rect x="150" y="30" width="20" height="16" fill="#ffffff" stroke="#e0e8e3" />
+                <path d="M150 30 Q160 16 170 30 Z" fill="#0f6b3d" />
+                <rect x="159" y="7" width="2" height="11" fill="#0f6b3d" />
+                <g fill="#eef4f0"><rect x="134" y="96" width="6" height="46" /><rect x="146" y="96" width="6" height="46" /><rect x="158" y="96" width="6" height="46" /><rect x="170" y="96" width="6" height="46" /><rect x="180" y="96" width="6" height="46" /></g>
+                <rect x="152" y="118" width="16" height="32" rx="8" fill="#138a4d" />
+                <g fill="#dcece4"><rect x="84" y="104" width="14" height="16" rx="2" /><rect x="104" y="104" width="14" height="16" rx="2" /><rect x="202" y="104" width="14" height="16" rx="2" /><rect x="222" y="104" width="14" height="16" rx="2" /></g>
+                <rect x="118" y="150" width="84" height="6" fill="#e6efe9" />
+            </svg>
+        </div>
 
-        <div class="welcome-cta">
+        <div class="w2-cta">
             <a class="btn btn-primary btn-lg btn-block" href="/Account/Login?first=true">Get Started <partial name="_Icon" model="@("arrow")" /></a>
             <a class="btn btn-outline btn-lg btn-block" href="/Account/Login">I already have an account</a>
         </div>
-        <div class="welcome-foot">Staff and administrators sign in with the same button.</div>
-    </section>
+
+        <div class="w2-foot"><partial name="_Icon" model="@("shield")" /><span><b>@inst</b> · Service · Integrity · Progress</span></div>
+    </div>
 </div>
